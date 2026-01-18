@@ -1,43 +1,23 @@
 /**
- * Root layout with providers and tab navigation
+ * Root layout with tab navigation
  */
 
-import { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useSettingsStore } from '@/stores/settingsStore';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
-function RootLayoutNav() {
-  const { darkMode, initialize } = useSettingsStore();
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
-
+export default function RootLayout() {
   return (
     <>
-      <StatusBar style={darkMode ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: '#2196F3',
           headerStyle: {
-            backgroundColor: darkMode ? '#1a1a1a' : '#ffffff',
+            backgroundColor: '#ffffff',
           },
-          headerTintColor: darkMode ? '#ffffff' : '#000000',
+          headerTintColor: '#000000',
           tabBarStyle: {
-            backgroundColor: darkMode ? '#1a1a1a' : '#ffffff',
+            backgroundColor: '#ffffff',
           },
         }}
       >
@@ -64,15 +44,5 @@ function RootLayoutNav() {
         />
       </Tabs>
     </>
-  );
-}
-
-export default function RootLayout() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <RootLayoutNav />
-      </SafeAreaProvider>
-    </QueryClientProvider>
   );
 }
