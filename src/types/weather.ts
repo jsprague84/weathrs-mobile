@@ -13,26 +13,34 @@ export interface CurrentWeather {
   description: string;
   icon: string;
   visibility?: number;
-  units: Units;
+  units?: Units;
 }
 
 export interface DailyForecast {
-  date: string;
-  temperature: {
-    min: number;
-    max: number;
-    day: number;
-    night: number;
-  };
-  feels_like: {
-    day: number;
-    night: number;
-  };
+  timestamp: number;
+  sunrise: number;
+  sunset: number;
+  moon_phase: number;
+  summary: string;
+  temp_min: number;
+  temp_max: number;
+  temp_day: number;
+  temp_night: number;
+  temp_morning: number;
+  temp_evening: number;
+  feels_like_day: number;
+  feels_like_night: number;
   humidity: number;
+  pressure: number;
+  uv_index: number;
+  clouds: number;
   wind_speed: number;
+  wind_direction: number;
+  precipitation_probability: number;
+  rain_volume?: number;
+  snow_volume?: number;
   description: string;
   icon: string;
-  pop: number; // Probability of precipitation
 }
 
 export interface HourlyForecast {

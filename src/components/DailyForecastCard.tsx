@@ -21,8 +21,8 @@ function getTemperatureUnit(units: Units): string {
   }
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
+function formatDate(timestamp: number): string {
+  const date = new Date(timestamp * 1000); // Convert Unix timestamp to milliseconds
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -43,18 +43,18 @@ function formatDate(dateString: string): string {
 
 export function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecastCardProps) {
   const tempUnit = getTemperatureUnit(units);
-  const precipChance = Math.round(forecast.pop * 100);
+  const precipChance = Math.round(forecast.precipitation_probability * 100);
 
   return (
     <View style={styles.card}>
-      <Text style={styles.date}>{formatDate(forecast.date)}</Text>
+      <Text style={styles.date}>{formatDate(forecast.timestamp)}</Text>
 
       <View style={styles.tempContainer}>
         <Text style={styles.tempHigh}>
-          {Math.round(forecast.temperature.max)}{tempUnit}
+          {Math.round(forecast.temp_max)}{tempUnit}
         </Text>
         <Text style={styles.tempLow}>
-          {Math.round(forecast.temperature.min)}{tempUnit}
+          {Math.round(forecast.temp_min)}{tempUnit}
         </Text>
       </View>
 
