@@ -1,8 +1,9 @@
 /**
- * Daily forecast card component
+ * Daily forecast card component with theme support
  */
 
 import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '@/theme';
 import type { DailyForecast, Units } from '@/types';
 
 interface DailyForecastCardProps {
@@ -22,7 +23,7 @@ function getTemperatureUnit(units: Units): string {
 }
 
 function formatDate(timestamp: number): string {
-  const date = new Date(timestamp * 1000); // Convert Unix timestamp to milliseconds
+  const date = new Date(timestamp * 1000);
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -42,26 +43,36 @@ function formatDate(timestamp: number): string {
 }
 
 export function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecastCardProps) {
+  const { colors, isDark } = useTheme();
   const tempUnit = getTemperatureUnit(units);
   const precipChance = Math.round(forecast.precipitation_probability * 100);
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.date}>{formatDate(forecast.timestamp)}</Text>
+    <View style={[styles.card, {
+      backgroundColor: colors.card,
+      shadowOpacity: isDark ? 0.2 : 0.05,
+    }]}>
+      <Text style={[styles.date, { color: colors.text }]}>
+        {formatDate(forecast.timestamp)}
+      </Text>
 
       <View style={styles.tempContainer}>
-        <Text style={styles.tempHigh}>
+        <Text style={[styles.tempHigh, { color: colors.text }]}>
           {Math.round(forecast.temp_max)}{tempUnit}
         </Text>
-        <Text style={styles.tempLow}>
+        <Text style={[styles.tempLow, { color: colors.textMuted }]}>
           {Math.round(forecast.temp_min)}{tempUnit}
         </Text>
       </View>
 
-      <Text style={styles.description}>{forecast.description}</Text>
+      <Text style={[styles.description, { color: colors.textSecondary }]}>
+        {forecast.description}
+      </Text>
 
       {precipChance > 0 && (
-        <Text style={styles.precip}>{precipChance}% precip</Text>
+        <Text style={[styles.precip, { color: colors.primary }]}>
+          {precipChance}% precip
+        </Text>
       )}
     </View>
   );
@@ -69,14 +80,12 @@ export function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecas
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     flexDirection: 'row',
@@ -86,7 +95,6 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     width: 80,
   },
   tempContainer: {
@@ -97,22 +105,18 @@ const styles = StyleSheet.create({
   tempHigh: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   tempLow: {
     fontSize: 14,
-    color: '#999',
   },
   description: {
     fontSize: 12,
-    color: '#666',
     textTransform: 'capitalize',
     flex: 1,
     textAlign: 'center',
   },
   precip: {
     fontSize: 12,
-    color: '#2196F3',
     width: 70,
     textAlign: 'right',
   },

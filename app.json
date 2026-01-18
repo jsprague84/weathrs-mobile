@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "weathrs-mobile",
+    "name": "Weathrs",
     "slug": "weathrs-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.weathrs.mobile"
+      "bundleIdentifier": "com.weathrs.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to provide local weather information."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,17 +26,35 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.weathrs.mobile"
+      "package": "com.weathrs.mobile",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#2196F3",
+          "image": "./assets/splash-icon.png",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#1565C0"
+          },
+          "imageWidth": 200
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "weathrs-mobile"
+      }
     }
   }
 }

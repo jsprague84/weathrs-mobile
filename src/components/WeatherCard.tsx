@@ -3,6 +3,7 @@
  */
 
 import { View, Text, StyleSheet } from 'react-native';
+import { useTheme } from '@/theme';
 import type { CurrentWeather, Units } from '@/types';
 
 interface WeatherCardProps {
@@ -26,46 +27,52 @@ function getSpeedUnit(units: Units): string {
 }
 
 export function WeatherCard({ weather, units = 'imperial' }: WeatherCardProps) {
+  const { colors, isDark } = useTheme();
   const tempUnit = getTemperatureUnit(units);
   const speedUnit = getSpeedUnit(units);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, {
+      backgroundColor: colors.card,
+      shadowOpacity: isDark ? 0.3 : 0.1,
+    }]}>
       <View style={styles.header}>
-        <Text style={styles.city}>{weather.city}</Text>
-        <Text style={styles.country}>{weather.country}</Text>
+        <Text style={[styles.city, { color: colors.text }]}>{weather.city}</Text>
+        <Text style={[styles.country, { color: colors.textSecondary }]}>{weather.country}</Text>
       </View>
 
       <View style={styles.mainTemp}>
-        <Text style={styles.temperature}>
+        <Text style={[styles.temperature, { color: colors.primary }]}>
           {Math.round(weather.temperature)}{tempUnit}
         </Text>
-        <Text style={styles.description}>{weather.description}</Text>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
+          {weather.description}
+        </Text>
       </View>
 
       <View style={styles.details}>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Feels Like</Text>
-          <Text style={styles.detailValue}>
+        <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
+          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Feels Like</Text>
+          <Text style={[styles.detailValue, { color: colors.text }]}>
             {Math.round(weather.feels_like)}{tempUnit}
           </Text>
         </View>
 
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Humidity</Text>
-          <Text style={styles.detailValue}>{weather.humidity}%</Text>
+        <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
+          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Humidity</Text>
+          <Text style={[styles.detailValue, { color: colors.text }]}>{weather.humidity}%</Text>
         </View>
 
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Wind</Text>
-          <Text style={styles.detailValue}>
+        <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
+          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Wind</Text>
+          <Text style={[styles.detailValue, { color: colors.text }]}>
             {Math.round(weather.wind_speed)} {speedUnit}
           </Text>
         </View>
 
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Pressure</Text>
-          <Text style={styles.detailValue}>{weather.pressure} hPa</Text>
+        <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
+          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Pressure</Text>
+          <Text style={[styles.detailValue, { color: colors.text }]}>{weather.pressure} hPa</Text>
         </View>
       </View>
     </View>
@@ -74,13 +81,11 @@ export function WeatherCard({ weather, units = 'imperial' }: WeatherCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
     borderRadius: 16,
     padding: 20,
     margin: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -91,11 +96,9 @@ const styles = StyleSheet.create({
   city: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
   },
   country: {
     fontSize: 16,
-    color: '#666',
   },
   mainTemp: {
     alignItems: 'center',
@@ -104,11 +107,9 @@ const styles = StyleSheet.create({
   temperature: {
     fontSize: 64,
     fontWeight: '200',
-    color: '#2196F3',
   },
   description: {
     fontSize: 18,
-    color: '#666',
     textTransform: 'capitalize',
     marginTop: 8,
   },
@@ -119,7 +120,6 @@ const styles = StyleSheet.create({
   },
   detailItem: {
     width: '48%',
-    backgroundColor: '#f5f5f5',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -127,12 +127,10 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 12,
-    color: '#999',
     marginBottom: 4,
   },
   detailValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
 });
