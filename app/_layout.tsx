@@ -3,9 +3,9 @@
  */
 
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -60,6 +60,9 @@ function TabsNavigator() {
           options={{
             title: 'Weather',
             tabBarLabel: 'Home',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="partly-sunny" size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -67,6 +70,9 @@ function TabsNavigator() {
           options={{
             title: '7-Day Forecast',
             tabBarLabel: 'Forecast',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="calendar" size={size} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -74,6 +80,9 @@ function TabsNavigator() {
           options={{
             title: 'Settings',
             tabBarLabel: 'Settings',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="settings-outline" size={size} color={color} />
+            ),
           }}
         />
       </Tabs>
