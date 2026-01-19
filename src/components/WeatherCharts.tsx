@@ -3,13 +3,11 @@
  */
 
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, useWindowDimensions, Pressable, Platform } from 'react-native';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme';
 import type { HourlyForecast, DailyForecast, Units } from '@/types';
-
-const screenWidth = Dimensions.get('window').width - 32;
 
 type ChartType = 'temperature' | 'precipitation' | 'humidity' | 'wind';
 
@@ -49,7 +47,11 @@ function formatDay(timestamp: number): string {
 
 export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: WeatherChartsProps) {
   const { colors, isDark } = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
   const [activeChart, setActiveChart] = useState<ChartType>('temperature');
+
+  // Calculate chart width based on current screen width (updates on rotation)
+  const chartWidth = windowWidth - 64; // Account for padding
 
   const handleChartChange = async (chart: ChartType) => {
     if (Platform.OS !== 'web') {
@@ -242,7 +244,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               </Text>
               <LineChart
                 data={tempData}
-                width={Math.max(screenWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 50)}
                 height={220}
                 chartConfig={chartConfig}
                 bezier
@@ -257,7 +259,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               </Text>
               <LineChart
                 data={dailyTempData}
-                width={Math.max(screenWidth, dailySlice.length * 60)}
+                width={Math.max(chartWidth, dailySlice.length * 60)}
                 height={220}
                 chartConfig={chartConfig}
                 bezier
@@ -276,7 +278,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               </Text>
               <BarChart
                 data={precipData}
-                width={Math.max(screenWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 50)}
                 height={220}
                 chartConfig={precipChartConfig}
                 style={styles.chart}
@@ -298,7 +300,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               </Text>
               <LineChart
                 data={humidityData}
-                width={Math.max(screenWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 50)}
                 height={220}
                 chartConfig={humidityChartConfig}
                 bezier
@@ -321,7 +323,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               </Text>
               <LineChart
                 data={windData}
-                width={Math.max(screenWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 50)}
                 height={220}
                 chartConfig={windChartConfig}
                 bezier
