@@ -28,6 +28,7 @@ import type { SchedulerJob, CreateJobRequest, UpdateJobRequest, Units } from '@/
 
 // Common cron presets (6-field format for tokio-cron-scheduler: sec min hour day month weekday)
 const CRON_PRESETS = [
+  { label: 'Custom Time...', value: 'custom', description: 'Set a specific time' },
   { label: '6:00 AM Daily', value: '0 0 6 * * *', description: 'Every day at 6 AM' },
   { label: '7:00 AM Daily', value: '0 0 7 * * *', description: 'Every day at 7 AM' },
   { label: '8:00 AM Daily', value: '0 0 8 * * *', description: 'Every day at 8 AM' },
@@ -35,6 +36,29 @@ const CRON_PRESETS = [
   { label: 'Every 6 hours', value: '0 0 */6 * * *', description: 'At minute 0 past every 6th hour' },
   { label: 'Every 12 hours', value: '0 0 */12 * * *', description: 'At minute 0 past every 12th hour' },
 ];
+
+// Convert hour and minute to 6-field cron for daily schedule
+function timeToCron(hour: number, minute: number): string {
+  return `0 ${minute} ${hour} * * *`;
+}
+
+// Parse cron to extract hour and minute (for daily schedules)
+function cronToTime(cron: string): { hour: number; minute: number } | null {
+  const parts = cron.split(' ');
+  if (parts.length !== 6) return null;
+  const [, minute, hour] = parts;
+  const h = parseInt(hour);
+  const m = parseInt(minute);
+  if (isNaN(h) || isNaN(m) || hour.includes('*') || hour.includes('/')) return null;
+  return { hour: h, minute: m };
+}
+
+// Format time for display
+function formatTime(hour: number, minute: number): string {
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${h12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+}
 
 function formatCron(cron: string): string {
   // Check against presets first
@@ -113,6 +137,9 @@ function JobFormModal({
   const { colors, isDark } = useTheme();
   const [formData, setFormData] = useState<JobFormData>(initialData || defaultFormData);
   const [showCronPresets, setShowCronPresets] = useState(false);
+  const [showCustomTime, setShowCustomTime] = useState(false);
+  const [customHour, setCustomHour] = useState(7);
+  const [customMinute, setCustomMinute] = useState(0);
 
   const handleSubmit = () => {
     if (!formData.name.trim()) {
@@ -127,8 +154,26 @@ function JobFormModal({
   };
 
   const handleCronPresetSelect = (value: string) => {
-    setFormData(prev => ({ ...prev, cron: value }));
-    setShowCronPresets(false);
+    if (value === 'custom') {
+      // Parse current cron to set initial custom time
+      const time = cronToTime(formData.cron);
+      if (time) {
+        setCustomHour(time.hour);
+        setCustomMinute(time.minute);
+      }
+      setShowCustomTime(true);
+      setShowCronPresets(false);
+    } else {
+      setFormData(prev => ({ ...prev, cron: value }));
+      setShowCronPresets(false);
+      setShowCustomTime(false);
+    }
+  };
+
+  const handleCustomTimeConfirm = () => {
+    const cron = timeToCron(customHour, customMinute);
+    setFormData(prev => ({ ...prev, cron }));
+    setShowCustomTime(false);
   };
 
   return (
@@ -195,6 +240,67 @@ function JobFormModal({
                     <Text style={[styles.presetDescription, { color: colors.textMuted }]}>{preset.description}</Text>
                   </Pressable>
                 ))}
+              </View>
+            )}
+
+            {showCustomTime && (
+              <View style={[styles.customTimeContainer, { backgroundColor: isDark ? colors.surface : colors.card, borderColor: colors.border }]}>
+                <Text style={[styles.customTimeTitle, { color: colors.text }]}>Set Daily Time</Text>
+                <View style={styles.timePickerRow}>
+                  <View style={styles.timePickerColumn}>
+                    <Text style={[styles.timePickerLabel, { color: colors.textMuted }]}>Hour</Text>
+                    <View style={styles.timePickerControls}>
+                      <Pressable
+                        style={[styles.timeButton, { backgroundColor: colors.primary }]}
+                        onPress={() => setCustomHour(h => (h + 1) % 24)}
+                      >
+                        <Ionicons name="chevron-up" size={20} color="#FFF" />
+                      </Pressable>
+                      <Text style={[styles.timeValue, { color: colors.text }]}>
+                        {customHour.toString().padStart(2, '0')}
+                      </Text>
+                      <Pressable
+                        style={[styles.timeButton, { backgroundColor: colors.primary }]}
+                        onPress={() => setCustomHour(h => (h - 1 + 24) % 24)}
+                      >
+                        <Ionicons name="chevron-down" size={20} color="#FFF" />
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Text style={[styles.timeSeparator, { color: colors.text }]}>:</Text>
+                  <View style={styles.timePickerColumn}>
+                    <Text style={[styles.timePickerLabel, { color: colors.textMuted }]}>Minute</Text>
+                    <View style={styles.timePickerControls}>
+                      <Pressable
+                        style={[styles.timeButton, { backgroundColor: colors.primary }]}
+                        onPress={() => setCustomMinute(m => (m + 5) % 60)}
+                      >
+                        <Ionicons name="chevron-up" size={20} color="#FFF" />
+                      </Pressable>
+                      <Text style={[styles.timeValue, { color: colors.text }]}>
+                        {customMinute.toString().padStart(2, '0')}
+                      </Text>
+                      <Pressable
+                        style={[styles.timeButton, { backgroundColor: colors.primary }]}
+                        onPress={() => setCustomMinute(m => (m - 5 + 60) % 60)}
+                      >
+                        <Ionicons name="chevron-down" size={20} color="#FFF" />
+                      </Pressable>
+                    </View>
+                  </View>
+                  <Text style={[styles.ampmText, { color: colors.textMuted }]}>
+                    {customHour >= 12 ? 'PM' : 'AM'}
+                  </Text>
+                </View>
+                <Text style={[styles.timePreview, { color: colors.text }]}>
+                  {formatTime(customHour, customMinute)} Daily
+                </Text>
+                <Pressable
+                  style={[styles.confirmTimeButton, { backgroundColor: colors.primary }]}
+                  onPress={handleCustomTimeConfirm}
+                >
+                  <Text style={styles.confirmTimeText}>Confirm Time</Text>
+                </Pressable>
               </View>
             )}
 
@@ -980,5 +1086,77 @@ const styles = StyleSheet.create({
   toggleHint: {
     fontSize: 12,
     marginTop: 2,
+  },
+  // Custom time picker styles
+  customTimeContainer: {
+    marginTop: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
+  },
+  customTimeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  timePickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  timePickerColumn: {
+    alignItems: 'center',
+  },
+  timePickerLabel: {
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  timePickerControls: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeButton: {
+    width: 40,
+    height: 32,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timeValue: {
+    fontSize: 28,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  timeSeparator: {
+    fontSize: 28,
+    fontWeight: '600',
+    marginTop: 20,
+  },
+  ampmText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 20,
+    marginLeft: 8,
+  },
+  timePreview: {
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  confirmTimeButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  confirmTimeText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
