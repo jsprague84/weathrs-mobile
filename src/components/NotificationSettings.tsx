@@ -23,6 +23,7 @@ export function NotificationSettings() {
     hasPermission,
     isPushSupported,
     isExpoGo,
+    error: hookError,
   } = useNotifications();
   const {
     expoPushToken,
@@ -57,6 +58,11 @@ export function NotificationSettings() {
       const token = await registerForPushNotifications();
 
       if (!token) {
+        // Token was null - could be permission denied or unsupported environment
+        // The registerForPushNotifications function shows its own alerts for known issues
+        // but we should still set an error message for the UI
+        const errorDetail = hookError || 'Could not obtain push token. Check notification permissions in device settings.';
+        setRegistrationError(errorDetail);
         setIsRegistering(false);
         return;
       }
@@ -194,6 +200,18 @@ export function NotificationSettings() {
   return (
     <Card>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>Push Notifications</Text>
+
+      {/* Debug Info - helps diagnose registration issues */}
+      <View style={[styles.debugBanner, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.debugText, { color: colors.textMuted }]}>
+          Push: {isPushSupported ? 'supported' : 'NOT supported'} | ExpoGo: {isExpoGo ? 'yes' : 'no'} | Permission: {hasPermission ? 'granted' : 'not granted'}
+        </Text>
+        {hookError && (
+          <Text style={[styles.debugText, { color: colors.error }]}>
+            Error: {hookError}
+          </Text>
+        )}
+      </View>
 
       {/* Expo Go Android Warning */}
       {!isPushSupported && Platform.OS === 'android' && (
@@ -491,5 +509,14 @@ const styles = StyleSheet.create({
   },
   unregisterText: {
     fontSize: 14,
+  },
+  debugBanner: {
+    padding: 8,
+    borderRadius: 6,
+    marginBottom: 12,
+  },
+  debugText: {
+    fontSize: 11,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });
