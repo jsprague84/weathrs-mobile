@@ -180,6 +180,6 @@ class WeathrsApi {
 }
 
 // Default instance - URL will be configured from settings
-export const api = new WeathrsApi('http://localhost:3000');
+export const api = new WeathrsApi('https://weathrs.js-node.cc');
 
 export default api;

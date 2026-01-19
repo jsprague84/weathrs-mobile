@@ -27,7 +27,10 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.weathrs.mobile",
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -46,15 +49,27 @@
           },
           "imageWidth": 200
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2196F3",
+          "defaultChannel": "weather"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "weathrs-mobile"
+        "projectId": "16db2325-efe5-4a06-b5ae-734deccbab75"
       }
-    }
+    },
+    "owner": "jsprague"
   }
 }

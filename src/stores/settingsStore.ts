@@ -29,7 +29,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       // API Configuration
-      apiUrl: 'http://localhost:3000',
+      apiUrl: 'https://weathrs.js-node.cc',
       setApiUrl: (url: string) => {
         api.setBaseUrl(url);
         set({ apiUrl: url });
