@@ -40,7 +40,7 @@ export function useForecast(city?: string) {
 
   return useQuery({
     queryKey: weatherKeys.forecast(queryCity),
-    queryFn: () => api.getForecast(queryCity || undefined, units),
+    queryFn: () => api.getFullForecast(queryCity || undefined, units),
     enabled: !!queryCity,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000, // 1 hour

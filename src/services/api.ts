@@ -5,6 +5,7 @@
 import type {
   CurrentWeather,
   Forecast,
+  FullForecast,
   DailyForecast,
   HourlyForecast,
   SchedulerJob,
@@ -61,8 +62,8 @@ class WeathrsApi {
     return this.request(`/weather/${encodeURIComponent(city)}`);
   }
 
-  // Forecasts
-  async getForecast(city?: string, units?: Units): Promise<Forecast> {
+  // Full forecast (includes current, hourly, daily)
+  async getFullForecast(city?: string, units?: Units): Promise<FullForecast> {
     const params = new URLSearchParams();
     if (city) params.append('city', city);
     if (units) params.append('units', units);
@@ -70,7 +71,7 @@ class WeathrsApi {
     return this.request(`/forecast${query ? `?${query}` : ''}`);
   }
 
-  async getForecastByCity(city: string): Promise<Forecast> {
+  async getFullForecastByCity(city: string): Promise<FullForecast> {
     return this.request(`/forecast/${encodeURIComponent(city)}`);
   }
 

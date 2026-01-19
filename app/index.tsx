@@ -1,5 +1,5 @@
 /**
- * Home screen - Current weather display
+ * Home screen - Current weather display with extended details
  */
 
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Platform } from 'react-native';
@@ -15,9 +15,9 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
 
-  const { data: weather, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ['weather', defaultCity, units],
-    queryFn: () => api.getCurrentWeather(defaultCity, units),
+  const { data: forecast, isLoading, error, refetch, isRefetching } = useQuery({
+    queryKey: ['forecast', 'full', defaultCity, units],
+    queryFn: () => api.getFullForecast(defaultCity, units),
     enabled: !!defaultCity,
     staleTime: 5 * 60 * 1000,
   });
@@ -28,7 +28,7 @@ export default function HomeScreen() {
       if (Platform.OS !== 'web') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      queryClient.invalidateQueries({ queryKey: ['weather'] });
+      queryClient.invalidateQueries({ queryKey: ['forecast'] });
     },
     onError: async () => {
       if (Platform.OS !== 'web') {
@@ -79,7 +79,13 @@ export default function HomeScreen() {
         />
       }
     >
-      {weather && <WeatherCard weather={weather} units={units} />}
+      {forecast && (
+        <WeatherCard
+          weather={forecast.current}
+          location={forecast.location}
+          units={units}
+        />
+      )}
 
       <View style={styles.actions}>
         <Button

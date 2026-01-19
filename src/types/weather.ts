@@ -14,6 +14,45 @@ export interface CurrentWeather {
   icon: string;
   visibility?: number;
   units?: Units;
+  // Extended fields from /forecast endpoint
+  timestamp?: number;
+  uv_index?: number;
+  clouds?: number;
+  wind_direction?: number;
+  sunrise?: number;
+  sunset?: number;
+}
+
+// Full current weather from /forecast endpoint
+export interface FullCurrentWeather {
+  timestamp: number;
+  temperature: number;
+  feels_like: number;
+  humidity: number;
+  pressure: number;
+  uv_index: number;
+  clouds: number;
+  visibility: number;
+  wind_speed: number;
+  wind_direction: number;
+  description: string;
+  icon: string;
+  sunrise: number;
+  sunset: number;
+}
+
+// Full forecast response from /forecast endpoint
+export interface FullForecast {
+  location: {
+    city: string;
+    country: string;
+    lat: number;
+    lon: number;
+  };
+  timezone: string;
+  current: FullCurrentWeather;
+  hourly: HourlyForecast[];
+  daily: DailyForecast[];
 }
 
 export interface DailyForecast {
@@ -44,14 +83,20 @@ export interface DailyForecast {
 }
 
 export interface HourlyForecast {
-  time: string;
+  timestamp: number;
   temperature: number;
   feels_like: number;
   humidity: number;
+  pressure: number;
+  uv_index: number;
+  clouds: number;
   wind_speed: number;
+  wind_direction: number;
+  precipitation_probability: number;
+  rain_volume?: number;
+  snow_volume?: number;
   description: string;
   icon: string;
-  pop: number;
 }
 
 export interface Forecast {
