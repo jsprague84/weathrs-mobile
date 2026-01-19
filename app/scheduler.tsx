@@ -26,14 +26,14 @@ import api from '@/services/api';
 import { Card, Button, Loading, NotificationSettings } from '@/components';
 import type { SchedulerJob, CreateJobRequest, UpdateJobRequest, Units } from '@/types';
 
-// Common cron presets
+// Common cron presets (6-field format for tokio-cron-scheduler: sec min hour day month weekday)
 const CRON_PRESETS = [
-  { label: '6:00 AM Daily', value: '0 6 * * *', description: 'Every day at 6 AM' },
-  { label: '7:00 AM Daily', value: '0 7 * * *', description: 'Every day at 7 AM' },
-  { label: '8:00 AM Daily', value: '0 8 * * *', description: 'Every day at 8 AM' },
-  { label: '6:00 PM Daily', value: '0 18 * * *', description: 'Every day at 6 PM' },
-  { label: 'Every 6 hours', value: '0 */6 * * *', description: 'At minute 0 past every 6th hour' },
-  { label: 'Every 12 hours', value: '0 */12 * * *', description: 'At minute 0 past every 12th hour' },
+  { label: '6:00 AM Daily', value: '0 0 6 * * *', description: 'Every day at 6 AM' },
+  { label: '7:00 AM Daily', value: '0 0 7 * * *', description: 'Every day at 7 AM' },
+  { label: '8:00 AM Daily', value: '0 0 8 * * *', description: 'Every day at 8 AM' },
+  { label: '6:00 PM Daily', value: '0 0 18 * * *', description: 'Every day at 6 PM' },
+  { label: 'Every 6 hours', value: '0 0 */6 * * *', description: 'At minute 0 past every 6th hour' },
+  { label: 'Every 12 hours', value: '0 0 */12 * * *', description: 'At minute 0 past every 12th hour' },
 ];
 
 function formatCron(cron: string): string {
@@ -41,11 +41,18 @@ function formatCron(cron: string): string {
   const preset = CRON_PRESETS.find(p => p.value === cron);
   if (preset) return preset.label;
 
-  // Simple cron format parser for display
+  // Simple cron format parser for display (handles both 5 and 6 field formats)
   const parts = cron.split(' ');
   if (parts.length < 5) return cron;
 
-  const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
+  // 6-field format: sec min hour day month weekday
+  // 5-field format: min hour day month weekday
+  const is6Field = parts.length === 6;
+  const minute = is6Field ? parts[1] : parts[0];
+  const hour = is6Field ? parts[2] : parts[1];
+  const dayOfMonth = is6Field ? parts[3] : parts[2];
+  const month = is6Field ? parts[4] : parts[3];
+  const dayOfWeek = is6Field ? parts[5] : parts[4];
 
   if (dayOfMonth === '*' && month === '*') {
     if (dayOfWeek === '*') {
@@ -79,7 +86,7 @@ const defaultFormData: JobFormData = {
   name: '',
   city: '',
   units: 'imperial',
-  cron: '0 7 * * *',
+  cron: '0 0 7 * * *',
   includeDaily: true,
   includeHourly: false,
   enabled: true,
