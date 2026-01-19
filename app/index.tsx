@@ -5,25 +5,33 @@
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Platform } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCard, Button, Loading, ErrorDisplay } from '@/components';
+import { WeatherCard, CitySelector, Button, Loading, ErrorDisplay } from '@/components';
 
 export default function HomeScreen() {
   const { defaultCity, units, apiUrl } = useSettingsStore();
+  const { getSelectedCity, cities } = useCitiesStore();
   const { colors } = useTheme();
   const queryClient = useQueryClient();
+  const router = useRouter();
+
+  // Use selected city from cities store, fallback to default city
+  const selectedCity = getSelectedCity();
+  const cityToQuery = selectedCity?.name || defaultCity;
 
   const { data: forecast, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ['forecast', 'full', defaultCity, units],
-    queryFn: () => api.getFullForecast(defaultCity, units),
-    enabled: !!defaultCity,
+    queryKey: ['forecast', 'full', cityToQuery, units],
+    queryFn: () => api.getFullForecast(cityToQuery, units),
+    enabled: !!cityToQuery,
     staleTime: 5 * 60 * 1000,
   });
 
   const triggerMutation = useMutation({
-    mutationFn: () => api.triggerForecast(defaultCity),
+    mutationFn: () => api.triggerForecast(cityToQuery),
     onSuccess: async () => {
       if (Platform.OS !== 'web') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -37,13 +45,17 @@ export default function HomeScreen() {
     },
   });
 
-  if (!defaultCity) {
+  const handleAddCity = () => {
+    router.push('/settings');
+  };
+
+  if (!cityToQuery) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.centered}>
           <Text style={[styles.title, { color: colors.text }]}>Welcome to Weathrs</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Go to Settings to configure your API server and default city.
+            Go to Settings to add cities and configure your API server.
           </Text>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
             Current API: {apiUrl}
@@ -54,7 +66,7 @@ export default function HomeScreen() {
   }
 
   if (isLoading) {
-    return <Loading message={`Loading weather for ${defaultCity}...`} />;
+    return <Loading message={`Loading weather for ${cityToQuery}...`} />;
   }
 
   if (error) {
@@ -79,6 +91,11 @@ export default function HomeScreen() {
         />
       }
     >
+      {/* City Selector - only show if there are saved cities */}
+      {cities.length > 0 && (
+        <CitySelector onAddCity={handleAddCity} />
+      )}
+
       {forecast && (
         <WeatherCard
           weather={forecast.current}

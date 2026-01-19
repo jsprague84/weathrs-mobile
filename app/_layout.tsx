@@ -68,10 +68,30 @@ function TabsNavigator() {
         <Tabs.Screen
           name="forecast"
           options={{
-            title: '7-Day Forecast',
+            title: 'Forecast',
             tabBarLabel: 'Forecast',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="calendar" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="charts"
+          options={{
+            title: 'Charts',
+            tabBarLabel: 'Charts',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="stats-chart" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="scheduler"
+          options={{
+            title: 'Scheduler',
+            tabBarLabel: 'Notify',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="notifications-outline" size={size} color={color} />
             ),
           }}
         />

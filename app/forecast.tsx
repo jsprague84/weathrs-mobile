@@ -6,29 +6,37 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { DailyForecastCard, HourlyForecastCard, Loading, ErrorDisplay } from '@/components';
+import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay } from '@/components';
 
 type ForecastView = 'daily' | 'hourly';
 
 export default function ForecastScreen() {
   const { defaultCity, units } = useSettingsStore();
+  const { getSelectedCity, cities } = useCitiesStore();
   const { colors, isDark } = useTheme();
+  const router = useRouter();
   const [activeView, setActiveView] = useState<ForecastView>('daily');
 
+  // Use selected city from cities store, fallback to default city
+  const selectedCity = getSelectedCity();
+  const cityToQuery = selectedCity?.name || defaultCity;
+
   const dailyQuery = useQuery({
-    queryKey: ['forecast', 'daily', defaultCity, units],
-    queryFn: () => api.getDailyForecast(defaultCity, units),
-    enabled: !!defaultCity,
+    queryKey: ['forecast', 'daily', cityToQuery, units],
+    queryFn: () => api.getDailyForecast(cityToQuery, units),
+    enabled: !!cityToQuery,
     staleTime: 10 * 60 * 1000,
   });
 
   const hourlyQuery = useQuery({
-    queryKey: ['forecast', 'hourly', defaultCity, units],
-    queryFn: () => api.getHourlyForecast(defaultCity, units),
-    enabled: !!defaultCity && activeView === 'hourly',
+    queryKey: ['forecast', 'hourly', cityToQuery, units],
+    queryFn: () => api.getHourlyForecast(cityToQuery, units),
+    enabled: !!cityToQuery && activeView === 'hourly',
     staleTime: 10 * 60 * 1000,
   });
 
@@ -39,17 +47,21 @@ export default function ForecastScreen() {
     setActiveView(view);
   };
 
+  const handleAddCity = () => {
+    router.push('/settings');
+  };
+
   const isLoading = activeView === 'daily' ? dailyQuery.isLoading : hourlyQuery.isLoading;
   const error = activeView === 'daily' ? dailyQuery.error : hourlyQuery.error;
   const isRefetching = activeView === 'daily' ? dailyQuery.isRefetching : hourlyQuery.isRefetching;
   const refetch = activeView === 'daily' ? dailyQuery.refetch : hourlyQuery.refetch;
 
-  if (!defaultCity) {
+  if (!cityToQuery) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.centered}>
           <Text style={[styles.message, { color: colors.textSecondary }]}>
-            Configure your default city in Settings to view the forecast.
+            Add cities in Settings to view the forecast.
           </Text>
         </View>
       </View>
@@ -72,6 +84,11 @@ export default function ForecastScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* City Selector - only show if there are saved cities */}
+      {cities.length > 0 && (
+        <CitySelector onAddCity={handleAddCity} />
+      )}
+
       {/* Segmented Control */}
       <View style={[styles.segmentedControl, { backgroundColor: isDark ? colors.surface : '#E0E0E0' }]}>
         <Pressable
@@ -124,7 +141,9 @@ export default function ForecastScreen() {
         <Text style={[styles.header, { color: colors.text }]}>
           {activeView === 'daily' ? '7-Day Forecast' : '48-Hour Forecast'}
         </Text>
-        <Text style={[styles.city, { color: colors.textSecondary }]}>{defaultCity}</Text>
+        <Text style={[styles.city, { color: colors.textSecondary }]}>
+          {selectedCity?.displayName || cityToQuery}
+        </Text>
 
         {activeView === 'daily' && dailyQuery.data?.daily?.map((day, index) => (
           <DailyForecastCard key={index} forecast={day} units={units} />
