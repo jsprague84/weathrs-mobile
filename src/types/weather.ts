@@ -144,3 +144,20 @@ export interface ApiError {
   error: string;
   message: string;
 }
+
+// Device registration for push notifications
+export interface DeviceRegistration {
+  token: string;
+  platform: 'ios' | 'android' | 'web';
+  deviceName?: string;
+  appVersion?: string;
+  cities?: string[];
+  units?: Units;
+  enabled?: boolean;
+}
+
+export interface DeviceRegistrationResponse {
+  success: boolean;
+  deviceId?: string;
+  message?: string;
+}

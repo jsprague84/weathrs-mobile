@@ -10,7 +10,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { Card, Button, Loading, ErrorDisplay } from '@/components';
+import { Card, Button, Loading, ErrorDisplay, NotificationSettings } from '@/components';
 import type { SchedulerJob } from '@/types';
 
 function formatCron(cron: string): string {
@@ -167,6 +167,9 @@ export default function SchedulerScreen() {
         />
       }
     >
+      {/* Push Notification Settings */}
+      <NotificationSettings />
+
       {/* Status Card */}
       <Card>
         <View style={styles.statusHeader}>

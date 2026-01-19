@@ -12,6 +12,8 @@ import type {
   SchedulerStatus,
   TriggerResponse,
   Units,
+  DeviceRegistration,
+  DeviceRegistrationResponse,
 } from '@/types';
 
 class WeathrsApi {
@@ -113,6 +115,39 @@ class WeathrsApi {
       ? `/scheduler/trigger/${encodeURIComponent(city)}`
       : '/scheduler/trigger';
     return this.request(endpoint, { method: 'POST' });
+  }
+
+  // Device registration for push notifications
+  async registerDevice(registration: DeviceRegistration): Promise<DeviceRegistrationResponse> {
+    return this.request('/devices/register', {
+      method: 'POST',
+      body: JSON.stringify(registration),
+    });
+  }
+
+  async unregisterDevice(token: string): Promise<{ success: boolean }> {
+    return this.request('/devices/unregister', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async updateDeviceSettings(
+    token: string,
+    settings: { enabled?: boolean; cities?: string[]; units?: Units }
+  ): Promise<DeviceRegistrationResponse> {
+    return this.request('/devices/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ token, ...settings }),
+    });
+  }
+
+  // Send test notification to device
+  async sendTestNotification(token: string): Promise<TriggerResponse> {
+    return this.request('/devices/test', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
   }
 }
 
