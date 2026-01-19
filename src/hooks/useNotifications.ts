@@ -1,12 +1,36 @@
 /**
  * Hook for managing push notifications with Expo
+ *
+ * Note: As of SDK 53, push notifications are not available in Expo Go on Android.
+ * A development build is required for push notifications on Android.
+ * Local notifications still work in Expo Go.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Platform, Alert } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+
+/**
+ * Check if we're running in Expo Go (as opposed to a development build or standalone app)
+ */
+function isRunningInExpoGo(): boolean {
+  return Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+}
+
+/**
+ * Check if push notifications are supported in the current environment
+ * SDK 53+ removed push notification support from Expo Go on Android
+ */
+export function isPushNotificationsSupported(): boolean {
+  // Push notifications work on iOS Expo Go, development builds, and standalone apps
+  // They do NOT work on Android Expo Go as of SDK 53
+  if (Platform.OS === 'android' && isRunningInExpoGo()) {
+    return false;
+  }
+  return true;
+}
 
 // Configure notification handler
 Notifications.setNotificationHandler({
@@ -30,6 +54,10 @@ interface UseNotificationsReturn extends NotificationState {
   registerForPushNotifications: () => Promise<string | null>;
   hasPermission: boolean;
   notification: Notifications.Notification | null;
+  /** Whether push notifications are supported in the current environment */
+  isPushSupported: boolean;
+  /** Whether running in Expo Go (useful for showing informational messages) */
+  isExpoGo: boolean;
 }
 
 export function useNotifications(): UseNotificationsReturn {
@@ -84,6 +112,18 @@ export function useNotifications(): UseNotificationsReturn {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
+      // Check if push notifications are supported in current environment
+      if (!isPushNotificationsSupported()) {
+        const errorMsg = 'Push notifications require a development build on Android. They are not available in Expo Go as of SDK 53.';
+        setState((prev) => ({ ...prev, loading: false, error: errorMsg }));
+        Alert.alert(
+          'Development Build Required',
+          'Push notifications are not available in Expo Go on Android.\n\nTo test push notifications, create a development build using:\n\nnpx expo run:android\n\nLocal notifications still work for testing.',
+          [{ text: 'OK' }]
+        );
+        return null;
+      }
+
       // Check if we're on a physical device (required for push notifications)
       if (!Device.isDevice) {
         const errorMsg = 'Push notifications require a physical device';
@@ -156,12 +196,16 @@ export function useNotifications(): UseNotificationsReturn {
   }, []);
 
   const hasPermission = state.permissionStatus === 'granted';
+  const isPushSupported = isPushNotificationsSupported();
+  const isExpoGo = isRunningInExpoGo();
 
   return {
     ...state,
     registerForPushNotifications,
     hasPermission,
     notification,
+    isPushSupported,
+    isExpoGo,
   };
 }
 

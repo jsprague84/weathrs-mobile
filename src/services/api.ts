@@ -14,6 +14,10 @@ import type {
   Units,
   DeviceRegistration,
   DeviceRegistrationResponse,
+  CreateJobRequest,
+  UpdateJobRequest,
+  JobResponse,
+  JobListResponse,
 } from '@/types';
 
 class WeathrsApi {
@@ -106,8 +110,32 @@ class WeathrsApi {
     return this.request('/scheduler/status');
   }
 
-  async getSchedulerJobs(): Promise<{ jobs: SchedulerJob[] }> {
+  async getSchedulerJobs(): Promise<JobListResponse> {
     return this.request('/scheduler/jobs');
+  }
+
+  async getSchedulerJob(id: string): Promise<JobResponse> {
+    return this.request(`/scheduler/jobs/${encodeURIComponent(id)}`);
+  }
+
+  async createSchedulerJob(job: CreateJobRequest): Promise<JobResponse> {
+    return this.request('/scheduler/jobs', {
+      method: 'POST',
+      body: JSON.stringify(job),
+    });
+  }
+
+  async updateSchedulerJob(id: string, updates: UpdateJobRequest): Promise<JobResponse> {
+    return this.request(`/scheduler/jobs/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  async deleteSchedulerJob(id: string): Promise<JobResponse> {
+    return this.request(`/scheduler/jobs/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
   }
 
   async triggerForecast(city?: string): Promise<TriggerResponse> {

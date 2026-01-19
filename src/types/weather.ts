@@ -161,3 +161,57 @@ export interface DeviceRegistrationResponse {
   deviceId?: string;
   message?: string;
 }
+
+// Scheduler job types
+export interface NotifyConfig {
+  onRun: boolean;
+  onAlert: boolean;
+  onPrecipitation: boolean;
+  coldThreshold?: number;
+  heatThreshold?: number;
+}
+
+export interface SchedulerJob {
+  id: string;
+  name: string;
+  city: string;
+  units: Units;
+  cron: string;
+  includeDaily: boolean;
+  includeHourly: boolean;
+  enabled: boolean;
+  notify: NotifyConfig;
+}
+
+export interface CreateJobRequest {
+  name: string;
+  city: string;
+  units?: Units;
+  cron: string;
+  includeDaily?: boolean;
+  includeHourly?: boolean;
+  enabled?: boolean;
+  notify?: Partial<NotifyConfig>;
+}
+
+export interface UpdateJobRequest {
+  name?: string;
+  city?: string;
+  units?: Units;
+  cron?: string;
+  includeDaily?: boolean;
+  includeHourly?: boolean;
+  enabled?: boolean;
+  notify?: Partial<NotifyConfig>;
+}
+
+export interface JobResponse {
+  success: boolean;
+  job?: SchedulerJob;
+  message?: string;
+}
+
+export interface JobListResponse {
+  jobs: SchedulerJob[];
+  count: number;
+}

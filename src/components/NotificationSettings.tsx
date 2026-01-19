@@ -17,7 +17,13 @@ import { Card, Button } from '@/components';
 
 export function NotificationSettings() {
   const { colors, isDark } = useTheme();
-  const { registerForPushNotifications, loading: permissionLoading, hasPermission } = useNotifications();
+  const {
+    registerForPushNotifications,
+    loading: permissionLoading,
+    hasPermission,
+    isPushSupported,
+    isExpoGo,
+  } = useNotifications();
   const {
     expoPushToken,
     isRegistered,
@@ -189,29 +195,77 @@ export function NotificationSettings() {
     <Card>
       <Text style={[styles.sectionTitle, { color: colors.text }]}>Push Notifications</Text>
 
+      {/* Expo Go Android Warning */}
+      {!isPushSupported && Platform.OS === 'android' && (
+        <View style={[styles.warningBanner, { backgroundColor: colors.warning + '20' }]}>
+          <Ionicons name="warning-outline" size={20} color={colors.warning} />
+          <View style={styles.warningTextContainer}>
+            <Text style={[styles.warningTitle, { color: colors.warning }]}>
+              Development Build Required
+            </Text>
+            <Text style={[styles.warningText, { color: colors.textSecondary }]}>
+              Push notifications are not available in Expo Go on Android (SDK 53+).
+              Create a development build to enable push notifications.
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* Registration Status */}
       {!isRegistered ? (
         <View style={styles.registrationContainer}>
           <View style={styles.registrationInfo}>
             <Ionicons name="notifications-off-outline" size={32} color={colors.textMuted} />
             <Text style={[styles.registrationText, { color: colors.textSecondary }]}>
-              Enable push notifications to receive weather updates directly on your device.
+              {isPushSupported
+                ? 'Enable push notifications to receive weather updates directly on your device.'
+                : 'Push notifications require a development build. You can still test local notifications below.'}
             </Text>
           </View>
 
-          <Button
-            title={isLoading ? 'Registering...' : 'Enable Notifications'}
-            onPress={handleRegister}
-            variant="primary"
-            disabled={isLoading}
-            loading={isLoading}
-            fullWidth
-          />
+          {isPushSupported ? (
+            <Button
+              title={isLoading ? 'Registering...' : 'Enable Notifications'}
+              onPress={handleRegister}
+              variant="primary"
+              disabled={isLoading}
+              loading={isLoading}
+              fullWidth
+            />
+          ) : (
+            <Button
+              title={isSendingTest ? 'Sending...' : 'Test Local Notification'}
+              onPress={handleSendTestNotification}
+              variant="secondary"
+              disabled={isSendingTest}
+              loading={isSendingTest}
+              fullWidth
+            />
+          )}
 
           {registrationError && (
             <Text style={[styles.errorText, { color: colors.error }]}>
               {registrationError}
             </Text>
+          )}
+
+          {testResult && !isPushSupported && (
+            <View style={[
+              styles.testResult,
+              { backgroundColor: testResult.success ? colors.success + '20' : colors.error + '20' }
+            ]}>
+              <Ionicons
+                name={testResult.success ? 'checkmark-circle' : 'close-circle'}
+                size={16}
+                color={testResult.success ? colors.success : colors.error}
+              />
+              <Text style={[
+                styles.testResultText,
+                { color: testResult.success ? colors.success : colors.error }
+              ]}>
+                {testResult.message}
+              </Text>
+            </View>
           )}
         </View>
       ) : (
@@ -333,6 +387,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 16,
+  },
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  warningTextContainer: {
+    flex: 1,
+  },
+  warningTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  warningText: {
+    fontSize: 13,
+    lineHeight: 18,
   },
   registrationContainer: {
     gap: 16,
