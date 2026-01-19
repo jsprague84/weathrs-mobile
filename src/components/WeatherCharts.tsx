@@ -60,8 +60,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
     setActiveChart(chart);
   };
 
-  // Use first 12 hours for hourly charts
-  const hourlySlice = hourlyData?.slice(0, 12) || [];
+  // Use first 24 hours for hourly charts, 7 days for daily
+  const hourlySlice = hourlyData?.slice(0, 24) || [];
   const dailySlice = dailyData?.slice(0, 7) || [];
 
   if (hourlySlice.length === 0 && dailySlice.length === 0) {
@@ -115,9 +115,14 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
     color: (opacity = 1) => `rgba(156, 39, 176, ${opacity})`, // Purple for wind
   };
 
+  // Show labels every 2 hours to prevent chart from being too wide
+  const hourlyLabels = hourlySlice.map((h, i) =>
+    i % 2 === 0 ? formatHour(h.timestamp) : ''
+  );
+
   // Temperature data (hourly)
   const tempData = {
-    labels: hourlySlice.map((h) => formatHour(h.timestamp)),
+    labels: hourlyLabels,
     datasets: [
       {
         data: hourlySlice.map((h) => Math.round(h.temperature)),
@@ -141,7 +146,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
 
   // Precipitation probability data (hourly, bar chart)
   const precipData = {
-    labels: hourlySlice.map((h) => formatHour(h.timestamp)),
+    labels: hourlyLabels,
     datasets: [
       {
         data: hourlySlice.map((h) => Math.round(h.precipitation_probability * 100)),
@@ -151,7 +156,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
 
   // Humidity data (hourly)
   const humidityData = {
-    labels: hourlySlice.map((h) => formatHour(h.timestamp)),
+    labels: hourlyLabels,
     datasets: [
       {
         data: hourlySlice.map((h) => h.humidity),
@@ -162,7 +167,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
 
   // Wind speed data (hourly)
   const windData = {
-    labels: hourlySlice.map((h) => formatHour(h.timestamp)),
+    labels: hourlyLabels,
     datasets: [
       {
         data: hourlySlice.map((h) => Math.round(h.wind_speed)),
@@ -187,6 +192,38 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
       },
     ],
     legend: [`High (${getTemperatureUnit(units)})`, `Low (${getTemperatureUnit(units)})`],
+  };
+
+  // Daily precipitation data
+  const dailyPrecipData = {
+    labels: dailySlice.map((d) => formatDay(d.timestamp)),
+    datasets: [
+      {
+        data: dailySlice.map((d) => Math.round(d.precipitation_probability * 100)),
+      },
+    ],
+  };
+
+  // Daily humidity data
+  const dailyHumidityData = {
+    labels: dailySlice.map((d) => formatDay(d.timestamp)),
+    datasets: [
+      {
+        data: dailySlice.map((d) => d.humidity),
+        strokeWidth: 2,
+      },
+    ],
+  };
+
+  // Daily wind data
+  const dailyWindData = {
+    labels: dailySlice.map((d) => formatDay(d.timestamp)),
+    datasets: [
+      {
+        data: dailySlice.map((d) => Math.round(d.wind_speed)),
+        strokeWidth: 2,
+      },
+    ],
   };
 
   const chartButtons: { type: ChartType; label: string }[] = [
@@ -240,11 +277,11 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
           {activeChart === 'temperature' && (
             <>
               <Text style={[styles.chartTitle, { color: colors.text }]}>
-                12-Hour Temperature
+                24-Hour Temperature
               </Text>
               <LineChart
                 data={tempData}
-                width={Math.max(chartWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 20)}
                 height={220}
                 chartConfig={chartConfig}
                 bezier
@@ -274,11 +311,11 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
           {activeChart === 'precipitation' && (
             <>
               <Text style={[styles.chartTitle, { color: colors.text }]}>
-                12-Hour Precipitation Chance
+                24-Hour Precipitation Chance
               </Text>
               <BarChart
                 data={precipData}
-                width={Math.max(chartWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 20)}
                 height={220}
                 chartConfig={precipChartConfig}
                 style={styles.chart}
@@ -287,20 +324,32 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 fromZero
                 showValuesOnTopOfBars
               />
-              <Text style={[styles.chartLegend, { color: colors.textMuted }]}>
-                Probability of precipitation each hour
+
+              <Text style={[styles.chartTitle, { color: colors.text, marginTop: 24 }]}>
+                7-Day Precipitation Chance
               </Text>
+              <BarChart
+                data={dailyPrecipData}
+                width={Math.max(chartWidth, dailySlice.length * 60)}
+                height={220}
+                chartConfig={precipChartConfig}
+                style={styles.chart}
+                yAxisSuffix="%"
+                yAxisLabel=""
+                fromZero
+                showValuesOnTopOfBars
+              />
             </>
           )}
 
           {activeChart === 'humidity' && (
             <>
               <Text style={[styles.chartTitle, { color: colors.text }]}>
-                12-Hour Humidity
+                24-Hour Humidity
               </Text>
               <LineChart
                 data={humidityData}
-                width={Math.max(chartWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 20)}
                 height={220}
                 chartConfig={humidityChartConfig}
                 bezier
@@ -310,20 +359,33 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 yAxisSuffix="%"
                 fromZero
               />
-              <Text style={[styles.chartLegend, { color: colors.textMuted }]}>
-                Relative humidity percentage
+
+              <Text style={[styles.chartTitle, { color: colors.text, marginTop: 24 }]}>
+                7-Day Humidity
               </Text>
+              <LineChart
+                data={dailyHumidityData}
+                width={Math.max(chartWidth, dailySlice.length * 60)}
+                height={220}
+                chartConfig={humidityChartConfig}
+                bezier
+                style={styles.chart}
+                withInnerLines={false}
+                withOuterLines={false}
+                yAxisSuffix="%"
+                fromZero
+              />
             </>
           )}
 
           {activeChart === 'wind' && (
             <>
               <Text style={[styles.chartTitle, { color: colors.text }]}>
-                12-Hour Wind Speed
+                24-Hour Wind Speed
               </Text>
               <LineChart
                 data={windData}
-                width={Math.max(chartWidth, hourlySlice.length * 50)}
+                width={Math.max(chartWidth, hourlySlice.length * 20)}
                 height={220}
                 chartConfig={windChartConfig}
                 bezier
@@ -333,9 +395,22 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 yAxisSuffix={` ${getSpeedUnit(units)}`}
                 fromZero
               />
-              <Text style={[styles.chartLegend, { color: colors.textMuted }]}>
-                Wind speed over time
+
+              <Text style={[styles.chartTitle, { color: colors.text, marginTop: 24 }]}>
+                7-Day Wind Speed
               </Text>
+              <LineChart
+                data={dailyWindData}
+                width={Math.max(chartWidth, dailySlice.length * 60)}
+                height={220}
+                chartConfig={windChartConfig}
+                bezier
+                style={styles.chart}
+                withInnerLines={false}
+                withOuterLines={false}
+                yAxisSuffix={` ${getSpeedUnit(units)}`}
+                fromZero
+              />
             </>
           )}
         </View>
