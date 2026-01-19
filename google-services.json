@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "374726707129",
+    "project_id": "weathrs-19ab8",
+    "storage_bucket": "weathrs-19ab8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374726707129:android:1d8190de415bb6ee9f1868",
+        "android_client_info": {
+          "package_name": "com.weathrs.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_ULryBVLQ8y9gMGi6CBJdu2DOlx2k5Rk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

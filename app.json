@@ -27,6 +27,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.weathrs.mobile",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
