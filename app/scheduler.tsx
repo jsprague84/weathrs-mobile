@@ -19,6 +19,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
@@ -135,6 +136,7 @@ function JobFormModal({
   isSubmitting: boolean;
 }) {
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
   const [formData, setFormData] = useState<JobFormData>(initialData || defaultFormData);
   const [showCronPresets, setShowCronPresets] = useState(false);
   const [showCustomTime, setShowCustomTime] = useState(false);
@@ -178,7 +180,7 @@ function JobFormModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.modalContainer, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
           <Pressable onPress={onClose} hitSlop={8}>
             <Text style={[styles.modalCancel, { color: colors.primary }]}>Cancel</Text>
