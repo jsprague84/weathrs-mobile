@@ -177,6 +177,8 @@ export interface SchedulerJob {
   city: string;
   units: Units;
   cron: string;
+  /** IANA timezone (e.g., "America/Chicago"). Defaults to UTC if not specified. */
+  timezone: string;
   includeDaily: boolean;
   includeHourly: boolean;
   enabled: boolean;
@@ -188,6 +190,8 @@ export interface CreateJobRequest {
   city: string;
   units?: Units;
   cron: string;
+  /** IANA timezone (e.g., "America/Chicago"). Defaults to UTC if not specified. */
+  timezone?: string;
   includeDaily?: boolean;
   includeHourly?: boolean;
   enabled?: boolean;
@@ -199,6 +203,8 @@ export interface UpdateJobRequest {
   city?: string;
   units?: Units;
   cron?: string;
+  /** IANA timezone (e.g., "America/Chicago") */
+  timezone?: string;
   includeDaily?: boolean;
   includeHourly?: boolean;
   enabled?: boolean;

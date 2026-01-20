@@ -453,6 +453,12 @@ function JobCard({
           <Text style={[styles.jobValue, { color: colors.text }]}>{formatCron(job.cron)}</Text>
         </View>
         <View style={styles.jobRow}>
+          <Text style={[styles.jobLabel, { color: colors.textMuted }]}>Timezone:</Text>
+          <Text style={[styles.jobValue, { color: colors.text }]}>
+            {job.timezone || 'UTC'}
+          </Text>
+        </View>
+        <View style={styles.jobRow}>
           <Text style={[styles.jobLabel, { color: colors.textMuted }]}>Units:</Text>
           <Text style={[styles.jobValue, { color: colors.text }]}>
             {job.units === 'imperial' ? 'Fahrenheit' : job.units === 'metric' ? 'Celsius' : 'Kelvin'}
@@ -664,11 +670,15 @@ export default function SchedulerScreen() {
   };
 
   const handleFormSubmit = (data: JobFormData) => {
+    // Auto-detect the user's timezone using the Intl API
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const jobData: CreateJobRequest = {
       name: data.name,
       city: data.city,
       units: data.units,
       cron: data.cron,
+      timezone: userTimezone, // Include user's timezone for proper scheduling
       includeDaily: data.includeDaily,
       includeHourly: data.includeHourly,
       enabled: data.enabled,
