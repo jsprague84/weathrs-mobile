@@ -34,7 +34,7 @@ function generateId(): string {
   return `city_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export const useCitiesStore = create<CitiesState>()(
+const citiesStore = create<CitiesState>()(
   persist(
     (set, get) => ({
       cities: [],
@@ -116,3 +116,21 @@ export const useCitiesStore = create<CitiesState>()(
     }
   )
 );
+
+// Main hook for backwards compatibility and actions
+export const useCitiesStore = citiesStore;
+
+// Atomic selectors for optimized re-renders
+export const useCities = () => citiesStore((s) => s.cities);
+export const useSelectedCityId = () => citiesStore((s) => s.selectedCityId);
+export const useSelectedCity = () => citiesStore((s) => s.getSelectedCity());
+
+// Action selectors (stable references)
+export const useCitiesActions = () => citiesStore((s) => ({
+  addCity: s.addCity,
+  removeCity: s.removeCity,
+  selectCity: s.selectCity,
+  updateCityDisplayName: s.updateCityDisplayName,
+  reorderCities: s.reorderCities,
+  getCityById: s.getCityById,
+}));

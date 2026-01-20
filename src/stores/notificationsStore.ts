@@ -28,7 +28,7 @@ interface NotificationsState {
   clearRegistration: () => void;
 }
 
-export const useNotificationsStore = create<NotificationsState>()(
+const notificationsStore = create<NotificationsState>()(
   persist(
     (set) => ({
       expoPushToken: null,
@@ -84,3 +84,23 @@ export const useNotificationsStore = create<NotificationsState>()(
     }
   )
 );
+
+// Main hook for backwards compatibility and actions
+export const useNotificationsStore = notificationsStore;
+
+// Atomic selectors for optimized re-renders
+export const useExpoPushToken = () => notificationsStore((s) => s.expoPushToken);
+export const useIsNotificationsRegistered = () => notificationsStore((s) => s.isRegistered);
+export const useNotificationsEnabled = () => notificationsStore((s) => s.enabled);
+export const useDailyForecastEnabled = () => notificationsStore((s) => s.dailyForecastEnabled);
+export const useAlertsEnabled = () => notificationsStore((s) => s.alertsEnabled);
+
+// Action selectors (stable references)
+export const useNotificationsActions = () => notificationsStore((s) => ({
+  setExpoPushToken: s.setExpoPushToken,
+  setRegistered: s.setRegistered,
+  setEnabled: s.setEnabled,
+  setDailyForecastEnabled: s.setDailyForecastEnabled,
+  setAlertsEnabled: s.setAlertsEnabled,
+  clearRegistration: s.clearRegistration,
+}));

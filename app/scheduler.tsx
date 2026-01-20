@@ -520,35 +520,86 @@ export default function SchedulerScreen() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateJobRequest }) => api.updateSchedulerJob(id, data),
+    onMutate: async ({ id, data }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['scheduler', 'jobs'] });
+
+      // Snapshot previous value
+      const previousJobs = queryClient.getQueryData<{ jobs: SchedulerJob[]; count: number }>(['scheduler', 'jobs']);
+
+      // Optimistically update
+      if (previousJobs) {
+        queryClient.setQueryData(['scheduler', 'jobs'], {
+          ...previousJobs,
+          jobs: previousJobs.jobs.map((job) =>
+            job.id === id ? { ...job, ...data } : job
+          ),
+        });
+      }
+
+      return { previousJobs };
+    },
+    onError: async (error, variables, context) => {
+      // Rollback on error
+      if (context?.previousJobs) {
+        queryClient.setQueryData(['scheduler', 'jobs'], context.previousJobs);
+      }
+      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update job');
+      if (Platform.OS !== 'web') {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['scheduler'] });
       setIsFormVisible(false);
       setEditingJob(null);
       if (Platform.OS !== 'web') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     },
-    onError: async (error) => {
-      Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update job');
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+    onSettled: () => {
+      // Refetch to ensure cache is in sync
+      queryClient.invalidateQueries({ queryKey: ['scheduler'] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteSchedulerJob(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['scheduler'] });
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onMutate: async (id) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['scheduler', 'jobs'] });
+
+      // Snapshot previous value
+      const previousJobs = queryClient.getQueryData<{ jobs: SchedulerJob[]; count: number }>(['scheduler', 'jobs']);
+
+      // Optimistically remove the job
+      if (previousJobs) {
+        queryClient.setQueryData(['scheduler', 'jobs'], {
+          ...previousJobs,
+          jobs: previousJobs.jobs.filter((job) => job.id !== id),
+          count: previousJobs.count - 1,
+        });
       }
+
+      return { previousJobs };
     },
-    onError: async (error) => {
+    onError: async (error, id, context) => {
+      // Rollback on error
+      if (context?.previousJobs) {
+        queryClient.setQueryData(['scheduler', 'jobs'], context.previousJobs);
+      }
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to delete job');
       if (Platform.OS !== 'web') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
+    },
+    onSuccess: async () => {
+      if (Platform.OS !== 'web') {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    },
+    onSettled: () => {
+      // Refetch to ensure cache is in sync
+      queryClient.invalidateQueries({ queryKey: ['scheduler'] });
     },
   });
 

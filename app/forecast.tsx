@@ -3,7 +3,8 @@
  */
 
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, Pressable, Platform } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -12,6 +13,7 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay } from '@/components';
+import type { DailyForecast, HourlyForecast } from '@/types';
 
 type ForecastView = 'daily' | 'hourly';
 
@@ -127,44 +129,71 @@ export default function ForecastScreen() {
         </Pressable>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => refetch()}
-            tintColor={colors.primary}
-          />
-        }
-      >
-        <Text style={[styles.header, { color: colors.text }]}>
-          {activeView === 'daily' ? '7-Day Forecast' : '48-Hour Forecast'}
-        </Text>
-        <Text style={[styles.city, { color: colors.textSecondary }]}>
-          {selectedCity?.displayName || cityToQuery}
-        </Text>
-
-        {activeView === 'daily' && dailyQuery.data?.daily?.map((day, index) => (
-          <DailyForecastCard key={index} forecast={day} units={units} />
-        ))}
-
-        {activeView === 'hourly' && hourlyQuery.data?.hourly?.map((hour, index) => (
-          <HourlyForecastCard key={index} forecast={hour} units={units} />
-        ))}
-
-        <Text style={[styles.hint, { color: colors.textMuted }]}>
-          Pull down to refresh
-        </Text>
-      </ScrollView>
+      {activeView === 'daily' ? (
+        <FlashList
+          data={dailyQuery.data?.daily ?? []}
+          renderItem={({ item }) => (
+            <DailyForecastCard forecast={item} units={units} />
+          )}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={[styles.header, { color: colors.text }]}>7-Day Forecast</Text>
+              <Text style={[styles.city, { color: colors.textSecondary }]}>
+                {selectedCity?.displayName || cityToQuery}
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              Pull down to refresh
+            </Text>
+          }
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={colors.primary}
+            />
+          }
+        />
+      ) : (
+        <FlashList
+          data={hourlyQuery.data?.hourly ?? []}
+          renderItem={({ item }) => (
+            <HourlyForecastCard forecast={item} units={units} />
+          )}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={[styles.header, { color: colors.text }]}>48-Hour Forecast</Text>
+              <Text style={[styles.city, { color: colors.textSecondary }]}>
+                {selectedCity?.displayName || cityToQuery}
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              Pull down to refresh
+            </Text>
+          }
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={colors.primary}
+            />
+          }
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollView: { flex: 1 },
   content: { paddingVertical: 16, paddingBottom: 32 },
+  listHeader: { marginBottom: 8 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   message: { fontSize: 16, textAlign: 'center', lineHeight: 24 },
   segmentedControl: {

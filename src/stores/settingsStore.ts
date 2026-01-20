@@ -25,7 +25,7 @@ interface SettingsState {
   initialize: () => void;
 }
 
-export const useSettingsStore = create<SettingsState>()(
+const settingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       // API Configuration
@@ -69,3 +69,20 @@ export const useSettingsStore = create<SettingsState>()(
     }
   )
 );
+
+// Main hook for backwards compatibility and actions
+export const useSettingsStore = settingsStore;
+
+// Atomic selectors for optimized re-renders
+export const useApiUrl = () => settingsStore((s) => s.apiUrl);
+export const useDefaultCity = () => settingsStore((s) => s.defaultCity);
+export const useUnits = () => settingsStore((s) => s.units);
+export const useIsHydrated = () => settingsStore((s) => s.isHydrated);
+
+// Action selectors (stable references)
+export const useSettingsActions = () => settingsStore((s) => ({
+  setApiUrl: s.setApiUrl,
+  setDefaultCity: s.setDefaultCity,
+  setUnits: s.setUnits,
+  initialize: s.initialize,
+}));
