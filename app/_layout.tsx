@@ -3,13 +3,14 @@
  */
 
 import { useEffect } from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { ThemeProvider, useTheme } from '@/theme';
 import { useSettingsStore } from '@/stores/settingsStore';
 
@@ -30,9 +31,52 @@ const asyncStoragePersister = createAsyncStoragePersister({
   key: 'weathrs-query-cache',
 });
 
+/**
+ * Hook to handle push notification taps and navigate to the appropriate screen
+ */
+function useNotificationObserver() {
+  useEffect(() => {
+    let isMounted = true;
+
+    function redirect(notification: Notifications.Notification) {
+      const data = notification.request.content.data;
+      const url = data?.url as string | undefined;
+
+      if (url) {
+        console.log('Navigating to:', url);
+        // Use type assertion for dynamic URL from notification data
+        router.push(url as `/forecast?city=${string}`);
+      }
+    }
+
+    // Handle the notification that opened the app (if any)
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (!isMounted || !response?.notification) {
+        return;
+      }
+      redirect(response.notification);
+    });
+
+    // Listen for notification taps while app is running
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        redirect(response.notification);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.remove();
+    };
+  }, []);
+}
+
 function TabsNavigator() {
   const { colors, isDark } = useTheme();
   const initializeSettings = useSettingsStore((state) => state.initialize);
+
+  // Handle notification taps for deep linking
+  useNotificationObserver();
 
   // Initialize settings on mount
   useEffect(() => {
