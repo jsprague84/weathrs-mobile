@@ -22,6 +22,7 @@ import type {
 
 class WeathrsApi {
   private baseUrl: string;
+  private apiKey: string | null = null;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
@@ -31,20 +32,36 @@ class WeathrsApi {
     this.baseUrl = url.replace(/\/$/, '');
   }
 
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+  /**
+   * Set the API key for device endpoints that require authentication
+   */
+  setApiKey(key: string | null) {
+    this.apiKey = key;
+  }
+
+  private async request<T>(endpoint: string, options?: RequestInit & { useApiKey?: boolean }): Promise<T> {
+    // API v1 routes are prefixed with /api/v1
+    const isApiV1 = !endpoint.startsWith('/health') && endpoint !== '/';
+    const url = `${this.baseUrl}${isApiV1 ? '/api/v1' : ''}${endpoint}`;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options?.headers as Record<string, string>),
+    };
+
+    // Add API key for device endpoints if configured
+    if (options?.useApiKey && this.apiKey) {
+      headers['X-API-Key'] = this.apiKey;
+    }
 
     const response = await fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `API Error: ${response.status}`);
+      throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
     }
 
     return response.json();
@@ -150,6 +167,7 @@ class WeathrsApi {
     return this.request('/devices/register', {
       method: 'POST',
       body: JSON.stringify(registration),
+      useApiKey: true,
     });
   }
 
@@ -157,6 +175,7 @@ class WeathrsApi {
     return this.request('/devices/unregister', {
       method: 'POST',
       body: JSON.stringify({ token }),
+      useApiKey: true,
     });
   }
 
@@ -167,6 +186,7 @@ class WeathrsApi {
     return this.request('/devices/settings', {
       method: 'PUT',
       body: JSON.stringify({ token, ...settings }),
+      useApiKey: true,
     });
   }
 
@@ -175,11 +195,19 @@ class WeathrsApi {
     return this.request('/devices/test', {
       method: 'POST',
       body: JSON.stringify({ token }),
+      useApiKey: true,
     });
   }
 }
 
 // Default instance - URL will be configured from settings
 export const api = new WeathrsApi('https://weathrs.js-node.cc');
+
+// Configure API key from environment if available
+// Set EXPO_PUBLIC_WEATHRS_API_KEY in .env or EAS build config
+const apiKey = process.env.EXPO_PUBLIC_WEATHRS_API_KEY;
+if (apiKey) {
+  api.setApiKey(apiKey);
+}
 
 export default api;
