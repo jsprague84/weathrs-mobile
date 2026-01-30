@@ -130,6 +130,16 @@ function TabsNavigator() {
           }}
         />
         <Tabs.Screen
+          name="history"
+          options={{
+            title: 'History',
+            tabBarLabel: 'History',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="time-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="scheduler"
           options={{
             title: 'Scheduler',

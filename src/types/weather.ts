@@ -221,3 +221,67 @@ export interface JobListResponse {
   jobs: SchedulerJob[];
   count: number;
 }
+
+// ============================================================================
+// History & Trends Types
+// ============================================================================
+
+export interface HistoryDataPoint {
+  timestamp: number;
+  temperature: number;
+  feels_like: number;
+  humidity: number;
+  pressure: number;
+  wind_speed: number;
+  wind_direction?: number;
+  clouds?: number;
+  visibility?: number;
+  description?: string;
+  icon?: string;
+  rain_1h?: number;
+  snow_1h?: number;
+}
+
+export interface DailyHistorySummary {
+  date: string;
+  temp_min: number;
+  temp_max: number;
+  temp_avg: number;
+  humidity_avg: number;
+  wind_speed_avg: number;
+  precipitation_total: number;
+  dominant_condition?: string;
+}
+
+export interface TrendSummary {
+  avg_temp: number;
+  temp_trend: 'rising' | 'falling' | 'stable';
+  max_temp: { value: number; date: string };
+  min_temp: { value: number; date: string };
+  total_precipitation: number;
+  avg_humidity: number;
+}
+
+export interface HistoryResponse {
+  city: string;
+  units: string;
+  period: string;
+  data_points: HistoryDataPoint[];
+}
+
+export interface DailyHistoryResponse {
+  city: string;
+  units: string;
+  period: string;
+  days: DailyHistorySummary[];
+}
+
+export interface TrendResponse {
+  city: string;
+  units: string;
+  period: string;
+  days: DailyHistorySummary[];
+  summary: TrendSummary;
+}
+
+export type HistoryPeriod = '7d' | '30d' | '90d';

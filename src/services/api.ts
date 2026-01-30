@@ -18,6 +18,10 @@ import type {
   UpdateJobRequest,
   JobResponse,
   JobListResponse,
+  HistoryResponse,
+  DailyHistoryResponse,
+  TrendResponse,
+  HistoryPeriod,
 } from '@/types';
 
 class WeathrsApi {
@@ -160,6 +164,30 @@ class WeathrsApi {
       ? `/scheduler/trigger/${encodeURIComponent(city)}`
       : '/scheduler/trigger';
     return this.request(endpoint, { method: 'POST' });
+  }
+
+  // History & Trends
+  async getWeatherHistory(city: string, start: number, end: number, units?: Units): Promise<HistoryResponse> {
+    const params = new URLSearchParams();
+    params.append('start', start.toString());
+    params.append('end', end.toString());
+    if (units) params.append('units', units);
+    return this.request(`/history/${encodeURIComponent(city)}?${params.toString()}`);
+  }
+
+  async getDailyHistory(city: string, start: number, end: number, units?: Units): Promise<DailyHistoryResponse> {
+    const params = new URLSearchParams();
+    params.append('start', start.toString());
+    params.append('end', end.toString());
+    if (units) params.append('units', units);
+    return this.request(`/history/${encodeURIComponent(city)}/daily?${params.toString()}`);
+  }
+
+  async getWeatherTrends(city: string, period: HistoryPeriod, units?: Units): Promise<TrendResponse> {
+    const params = new URLSearchParams();
+    params.append('period', period);
+    if (units) params.append('units', units);
+    return this.request(`/history/${encodeURIComponent(city)}/trends?${params.toString()}`);
   }
 
   // Device registration for push notifications
