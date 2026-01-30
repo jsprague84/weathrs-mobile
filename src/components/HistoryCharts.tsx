@@ -27,23 +27,50 @@ function getTemperatureUnit(units: Units): string {
   }
 }
 
-/** Compute props for y-axis negative value support */
-function getNegativeAxisProps(datasets: { value: number }[][]) {
+/**
+ * Compute y-axis scaling props that handle both positive and negative values.
+ * gifted-charts requires: maxValue = noOfSections * stepValue
+ * and: mostNegativeValue = noOfSectionsBelowXAxis * stepValue
+ */
+function getYAxisProps(datasets: { value: number }[][]) {
   const allValues = datasets.flat().map((d) => d.value);
+  if (allValues.length === 0) return {};
+
   const minVal = Math.min(...allValues);
   const maxVal = Math.max(...allValues);
 
-  if (minVal >= 0) return {};
+  // Add padding so data points aren't clipped at edges
+  const padding = Math.max(Math.ceil((maxVal - minVal) * 0.1), 1);
+  const paddedMax = maxVal + padding;
+  const paddedMin = minVal - padding;
 
-  const absMin = Math.abs(minVal);
-  const range = maxVal - minVal;
-  const stepValue = Math.ceil(range / 5);
-  const noOfSectionsBelowXAxis = Math.ceil(absMin / stepValue);
+  // Pick a nice step value for ~5 sections across the full range
+  const range = paddedMax - Math.min(paddedMin, 0);
+  const rawStep = range / 5;
+  // Round step to a "nice" number (1, 2, 5, 10, 20, 25, 50, ...)
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const residual = rawStep / magnitude;
+  const niceStep = magnitude * (residual <= 1.5 ? 1 : residual <= 3.5 ? 2.5 : residual <= 7.5 ? 5 : 10);
+  const stepValue = Math.max(Math.ceil(niceStep), 1);
+
+  const noOfSections = Math.ceil(paddedMax / stepValue);
+  const computedMax = noOfSections * stepValue;
+
+  if (paddedMin >= 0) {
+    return { maxValue: computedMax, noOfSections, stepValue };
+  }
+
+  const noOfSectionsBelowXAxis = Math.ceil(Math.abs(paddedMin) / stepValue);
   const mostNegativeValue = noOfSectionsBelowXAxis * stepValue;
 
   return {
+    maxValue: computedMax,
+    noOfSections,
+    stepValue,
     mostNegativeValue,
     noOfSectionsBelowXAxis,
+    // Push x-axis labels below the negative region so they don't overlap the chart
+    xAxisLabelsVerticalShift: noOfSectionsBelowXAxis * 30,
   };
 }
 
@@ -113,7 +140,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
             data2={lowData}
             data3={avgData}
             {...commonLineProps}
-            {...getNegativeAxisProps([highData, lowData, avgData])}
+            {...getYAxisProps([highData, lowData, avgData])}
             color="#F44336"
             color2="#2196F3"
             color3={colors.primary}
@@ -194,6 +221,8 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
             color="#4CAF50"
             dataPointsColor="#4CAF50"
             maxValue={100}
+            noOfSections={5}
+            stepValue={20}
             yAxisLabelSuffix="%"
             areaChart
             startFillColor="rgba(76, 175, 80, 0.2)"
@@ -221,6 +250,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
           <LineChart
             data={windData}
             {...commonLineProps}
+            {...getYAxisProps([windData])}
             color="#9C27B0"
             dataPointsColor="#9C27B0"
             areaChart
