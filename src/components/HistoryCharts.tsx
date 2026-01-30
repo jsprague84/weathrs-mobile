@@ -27,6 +27,26 @@ function getTemperatureUnit(units: Units): string {
   }
 }
 
+/** Compute props for y-axis negative value support */
+function getNegativeAxisProps(datasets: { value: number }[][]) {
+  const allValues = datasets.flat().map((d) => d.value);
+  const minVal = Math.min(...allValues);
+  const maxVal = Math.max(...allValues);
+
+  if (minVal >= 0) return {};
+
+  const absMin = Math.abs(minVal);
+  const range = maxVal - minVal;
+  const stepValue = Math.ceil(range / 5);
+  const noOfSectionsBelowXAxis = Math.ceil(absMin / stepValue);
+  const mostNegativeValue = noOfSectionsBelowXAxis * stepValue;
+
+  return {
+    mostNegativeValue,
+    noOfSectionsBelowXAxis,
+  };
+}
+
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -93,6 +113,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
             data2={lowData}
             data3={avgData}
             {...commonLineProps}
+            {...getNegativeAxisProps([highData, lowData, avgData])}
             color="#F44336"
             color2="#2196F3"
             color3={colors.primary}

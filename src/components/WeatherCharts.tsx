@@ -33,6 +33,26 @@ function getSpeedUnit(units: Units): string {
   return units === 'imperial' ? 'mph' : 'm/s';
 }
 
+/** Compute props for y-axis negative value support */
+function getNegativeAxisProps(datasets: { value: number }[][]) {
+  const allValues = datasets.flat().map((d) => d.value);
+  const minVal = Math.min(...allValues);
+  const maxVal = Math.max(...allValues);
+
+  if (minVal >= 0) return {};
+
+  const absMin = Math.abs(minVal);
+  const range = maxVal - minVal;
+  const stepValue = Math.ceil(range / 5);
+  const noOfSectionsBelowXAxis = Math.ceil(absMin / stepValue);
+  const mostNegativeValue = noOfSectionsBelowXAxis * stepValue;
+
+  return {
+    mostNegativeValue,
+    noOfSectionsBelowXAxis,
+  };
+}
+
 function formatHour(timestamp: number): string {
   return new Date(timestamp * 1000).toLocaleTimeString('en-US', {
     hour: 'numeric',
@@ -200,6 +220,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={hourlyTempData}
                 data2={hourlyFeelsLikeData}
                 {...lineChartCommon}
+                {...getNegativeAxisProps([hourlyTempData, hourlyFeelsLikeData])}
                 color={colors.primary}
                 color2="#FF9800"
                 dataPointsColor={colors.primary}
@@ -230,6 +251,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={dailyHighData}
                 data2={dailyLowData}
                 {...lineChartCommon}
+                {...getNegativeAxisProps([dailyHighData, dailyLowData])}
                 spacing={40}
                 color="#F44336"
                 color2="#2196F3"
