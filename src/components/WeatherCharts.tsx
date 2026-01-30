@@ -183,7 +183,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
     thickness: 2,
     hideRules: true,
     yAxisTextStyle: { color: colors.textSecondary, fontSize: 10 },
-    xAxisLabelTextStyle: { color: colors.textSecondary, fontSize: 9 },
+    xAxisLabelTextStyle: { color: colors.textSecondary, fontSize: 9, width: 36, textAlign: 'center' as const },
     hideDataPoints: false,
     dataPointsRadius: 3,
     spacing: 18,
@@ -320,7 +320,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 noOfSections={5}
                 stepValue={20}
                 yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
-                xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 9 }}
+                xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 9, width: 36, textAlign: 'center' }}
                 yAxisColor="transparent"
                 xAxisColor={colors.border}
                 hideRules
@@ -343,7 +343,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 noOfSections={5}
                 stepValue={20}
                 yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
-                xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 9 }}
+                xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 9, width: 40, textAlign: 'center' }}
                 yAxisColor="transparent"
                 xAxisColor={colors.border}
                 hideRules
