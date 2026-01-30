@@ -32,7 +32,7 @@ function getTemperatureUnit(units: Units): string {
  * gifted-charts requires: maxValue = noOfSections * stepValue
  * and: mostNegativeValue = noOfSectionsBelowXAxis * stepValue
  */
-function getYAxisProps(datasets: { value: number }[][]) {
+function getYAxisProps(datasets: { value: number }[][], chartHeight: number) {
   const allValues = datasets.flat().map((d) => d.value);
   if (allValues.length === 0) return {};
 
@@ -40,7 +40,7 @@ function getYAxisProps(datasets: { value: number }[][]) {
   const maxVal = Math.max(...allValues);
 
   // Add padding so data points aren't clipped at edges
-  const padding = Math.max(Math.ceil((maxVal - minVal) * 0.1), 1);
+  const padding = Math.max(Math.ceil((maxVal - minVal) * 0.15), 2);
   const paddedMax = maxVal + padding;
   const paddedMin = minVal - padding;
 
@@ -63,6 +63,9 @@ function getYAxisProps(datasets: { value: number }[][]) {
   const noOfSectionsBelowXAxis = Math.ceil(Math.abs(paddedMin) / stepValue);
   const mostNegativeValue = noOfSectionsBelowXAxis * stepValue;
 
+  // Compute pixel height of each section, then shift labels below negative area
+  const stepHeight = chartHeight / noOfSections;
+
   return {
     maxValue: computedMax,
     noOfSections,
@@ -70,7 +73,7 @@ function getYAxisProps(datasets: { value: number }[][]) {
     mostNegativeValue,
     noOfSectionsBelowXAxis,
     // Push x-axis labels below the negative region so they don't overlap the chart
-    xAxisLabelsVerticalShift: noOfSectionsBelowXAxis * 30,
+    xAxisLabelsVerticalShift: Math.ceil(noOfSectionsBelowXAxis * stepHeight),
   };
 }
 
@@ -140,7 +143,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
             data2={lowData}
             data3={avgData}
             {...commonLineProps}
-            {...getYAxisProps([highData, lowData, avgData])}
+            {...getYAxisProps([highData, lowData, avgData], 200)}
             color="#F44336"
             color2="#2196F3"
             color3={colors.primary}
@@ -250,7 +253,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
           <LineChart
             data={windData}
             {...commonLineProps}
-            {...getYAxisProps([windData])}
+            {...getYAxisProps([windData], 200)}
             color="#9C27B0"
             dataPointsColor="#9C27B0"
             areaChart

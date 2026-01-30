@@ -78,17 +78,25 @@ export function useHourlyForecast(city?: string) {
   });
 }
 
+/** Compute start/end timestamps aligned to midnight UTC for a given period */
+function getHistoryRange(period: HistoryPeriod) {
+  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+  // Align to start of today (midnight UTC)
+  const todayMidnight = Math.floor(Date.now() / 86400000) * 86400;
+  const end = todayMidnight; // up to start of today (OWM can't return today's data)
+  const start = end - days * 86400;
+  return { start, end };
+}
+
 // Weather history hook
 export function useWeatherHistory(city?: string, period: HistoryPeriod = '7d') {
   const { defaultCity, units } = useSettingsStore();
   const queryCity = city || defaultCity;
-  const now = Math.floor(Date.now() / 1000);
-  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-  const start = now - days * 86400;
+  const { start, end } = getHistoryRange(period);
 
   return useQuery({
     queryKey: weatherKeys.history(queryCity),
-    queryFn: () => api.getWeatherHistory(queryCity!, start, now, units),
+    queryFn: () => api.getWeatherHistory(queryCity!, start, end, units),
     enabled: !!queryCity,
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 2 * 60 * 60 * 1000, // 2 hours
@@ -99,13 +107,11 @@ export function useWeatherHistory(city?: string, period: HistoryPeriod = '7d') {
 export function useDailyHistory(city?: string, period: HistoryPeriod = '7d') {
   const { defaultCity, units } = useSettingsStore();
   const queryCity = city || defaultCity;
-  const now = Math.floor(Date.now() / 1000);
-  const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
-  const start = now - days * 86400;
+  const { start, end } = getHistoryRange(period);
 
   return useQuery({
     queryKey: weatherKeys.dailyHistory(queryCity, period),
-    queryFn: () => api.getDailyHistory(queryCity!, start, now, units),
+    queryFn: () => api.getDailyHistory(queryCity!, start, end, units),
     enabled: !!queryCity,
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 2 * 60 * 60 * 1000, // 2 hours

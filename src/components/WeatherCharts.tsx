@@ -38,7 +38,7 @@ function getSpeedUnit(units: Units): string {
  * gifted-charts requires: maxValue = noOfSections * stepValue
  * and: mostNegativeValue = noOfSectionsBelowXAxis * stepValue
  */
-function getYAxisProps(datasets: { value: number }[][]) {
+function getYAxisProps(datasets: { value: number }[][], chartHeight: number) {
   const allValues = datasets.flat().map((d) => d.value);
   if (allValues.length === 0) return {};
 
@@ -46,7 +46,7 @@ function getYAxisProps(datasets: { value: number }[][]) {
   const maxVal = Math.max(...allValues);
 
   // Add padding so data points aren't clipped at edges
-  const padding = Math.max(Math.ceil((maxVal - minVal) * 0.1), 1);
+  const padding = Math.max(Math.ceil((maxVal - minVal) * 0.15), 2);
   const paddedMax = maxVal + padding;
   const paddedMin = minVal - padding;
 
@@ -69,6 +69,9 @@ function getYAxisProps(datasets: { value: number }[][]) {
   const noOfSectionsBelowXAxis = Math.ceil(Math.abs(paddedMin) / stepValue);
   const mostNegativeValue = noOfSectionsBelowXAxis * stepValue;
 
+  // Compute pixel height of each section, then shift labels below negative area
+  const stepHeight = chartHeight / noOfSections;
+
   return {
     maxValue: computedMax,
     noOfSections,
@@ -76,7 +79,7 @@ function getYAxisProps(datasets: { value: number }[][]) {
     mostNegativeValue,
     noOfSectionsBelowXAxis,
     // Push x-axis labels below the negative region so they don't overlap the chart
-    xAxisLabelsVerticalShift: noOfSectionsBelowXAxis * 30,
+    xAxisLabelsVerticalShift: Math.ceil(noOfSectionsBelowXAxis * stepHeight),
   };
 }
 
@@ -247,7 +250,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={hourlyTempData}
                 data2={hourlyFeelsLikeData}
                 {...lineChartCommon}
-                {...getYAxisProps([hourlyTempData, hourlyFeelsLikeData])}
+                {...getYAxisProps([hourlyTempData, hourlyFeelsLikeData], 180)}
                 color={colors.primary}
                 color2="#FF9800"
                 dataPointsColor={colors.primary}
@@ -278,7 +281,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={dailyHighData}
                 data2={dailyLowData}
                 {...lineChartCommon}
-                {...getYAxisProps([dailyHighData, dailyLowData])}
+                {...getYAxisProps([dailyHighData, dailyLowData], 180)}
                 spacing={40}
                 color="#F44336"
                 color2="#2196F3"
@@ -402,7 +405,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               <LineChart
                 data={hourlyWindData}
                 {...lineChartCommon}
-                {...getYAxisProps([hourlyWindData])}
+                {...getYAxisProps([hourlyWindData], 180)}
                 color="#9C27B0"
                 dataPointsColor="#9C27B0"
                 height={180}
@@ -416,7 +419,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               <LineChart
                 data={dailyWindData}
                 {...lineChartCommon}
-                {...getYAxisProps([dailyWindData])}
+                {...getYAxisProps([dailyWindData], 180)}
                 spacing={40}
                 color="#9C27B0"
                 dataPointsColor="#9C27B0"
