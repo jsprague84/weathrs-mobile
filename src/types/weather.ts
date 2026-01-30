@@ -284,4 +284,4 @@ export interface TrendResponse {
   summary: TrendSummary;
 }
 
-export type HistoryPeriod = '7d' | '30d' | '90d';
+export type HistoryPeriod = '7d' | '30d' | '90d' | 'custom';

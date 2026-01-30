@@ -15,8 +15,10 @@ export const weatherKeys = {
   daily: (city?: string) => [...weatherKeys.all, 'daily', city] as const,
   hourly: (city?: string) => [...weatherKeys.all, 'hourly', city] as const,
   history: (city?: string) => [...weatherKeys.all, 'history', city] as const,
-  dailyHistory: (city?: string, period?: string) => [...weatherKeys.all, 'dailyHistory', city, period] as const,
-  trends: (city?: string, period?: string) => [...weatherKeys.all, 'trends', city, period] as const,
+  dailyHistory: (city?: string, period?: string, customStart?: number, customEnd?: number) =>
+    [...weatherKeys.all, 'dailyHistory', city, period, customStart, customEnd] as const,
+  trends: (city?: string, period?: string, customStart?: number, customEnd?: number) =>
+    [...weatherKeys.all, 'trends', city, period, customStart, customEnd] as const,
   scheduler: ['scheduler'] as const,
   schedulerStatus: () => [...weatherKeys.scheduler, 'status'] as const,
   schedulerJobs: () => [...weatherKeys.scheduler, 'jobs'] as const,
@@ -104,29 +106,43 @@ export function useWeatherHistory(city?: string, period: HistoryPeriod = '7d') {
 }
 
 // Daily history hook
-export function useDailyHistory(city?: string, period: HistoryPeriod = '7d') {
+export function useDailyHistory(
+  city?: string,
+  period: HistoryPeriod = '7d',
+  customStart?: number,
+  customEnd?: number,
+) {
   const { defaultCity, units } = useSettingsStore();
   const queryCity = city || defaultCity;
-  const { start, end } = getHistoryRange(period);
+
+  const isCustom = period === 'custom' && customStart != null && customEnd != null;
+  const range = isCustom ? { start: customStart, end: customEnd } : getHistoryRange(period as Exclude<HistoryPeriod, 'custom'>);
 
   return useQuery({
-    queryKey: weatherKeys.dailyHistory(queryCity, period),
-    queryFn: () => api.getDailyHistory(queryCity!, start, end, units),
-    enabled: !!queryCity,
+    queryKey: weatherKeys.dailyHistory(queryCity, period, isCustom ? customStart : undefined, isCustom ? customEnd : undefined),
+    queryFn: () => api.getDailyHistory(queryCity!, range.start, range.end, units),
+    enabled: !!queryCity && (!isCustom || (customStart != null && customEnd != null)),
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 2 * 60 * 60 * 1000, // 2 hours
   });
 }
 
 // Weather trends hook
-export function useWeatherTrends(city?: string, period: HistoryPeriod = '7d') {
+export function useWeatherTrends(
+  city?: string,
+  period: HistoryPeriod = '7d',
+  customStart?: number,
+  customEnd?: number,
+) {
   const { defaultCity, units } = useSettingsStore();
   const queryCity = city || defaultCity;
 
+  const isCustom = period === 'custom' && customStart != null && customEnd != null;
+
   return useQuery({
-    queryKey: weatherKeys.trends(queryCity, period),
-    queryFn: () => api.getWeatherTrends(queryCity!, period, units),
-    enabled: !!queryCity,
+    queryKey: weatherKeys.trends(queryCity, period, isCustom ? customStart : undefined, isCustom ? customEnd : undefined),
+    queryFn: () => api.getWeatherTrends(queryCity!, period, units, isCustom ? customStart : undefined, isCustom ? customEnd : undefined),
+    enabled: !!queryCity && (!isCustom || (customStart != null && customEnd != null)),
     staleTime: 30 * 60 * 1000, // 30 minutes
     gcTime: 60 * 60 * 1000, // 1 hour
   });

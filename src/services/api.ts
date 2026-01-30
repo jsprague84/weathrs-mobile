@@ -183,9 +183,20 @@ class WeathrsApi {
     return this.request(`/history/${encodeURIComponent(city)}/daily?${params.toString()}`);
   }
 
-  async getWeatherTrends(city: string, period: HistoryPeriod, units?: Units): Promise<TrendResponse> {
+  async getWeatherTrends(
+    city: string,
+    period: HistoryPeriod,
+    units?: Units,
+    start?: number,
+    end?: number,
+  ): Promise<TrendResponse> {
     const params = new URLSearchParams();
-    params.append('period', period);
+    if (period === 'custom' && start != null && end != null) {
+      params.append('start', start.toString());
+      params.append('end', end.toString());
+    } else {
+      params.append('period', period);
+    }
     if (units) params.append('units', units);
     return this.request(`/history/${encodeURIComponent(city)}/trends?${params.toString()}`);
   }

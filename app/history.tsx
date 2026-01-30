@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,7 @@ const PERIODS: { value: HistoryPeriod; label: string }[] = [
   { value: '7d', label: '7 Days' },
   { value: '30d', label: '30 Days' },
   { value: '90d', label: '90 Days' },
+  { value: 'custom', label: 'Custom' },
 ];
 
 type HistoryChartType = 'temperature' | 'precipitation' | 'humidity' | 'wind';
@@ -75,18 +77,56 @@ export default function HistoryScreen() {
   const [period, setPeriod] = useState<HistoryPeriod>('7d');
   const [chartType, setChartType] = useState<HistoryChartType>('temperature');
 
+  // Custom date range state
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+
+  const [customStart, setCustomStart] = useState<Date>(thirtyDaysAgo);
+  const [customEnd, setCustomEnd] = useState<Date>(yesterday);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
+  // Convert to midnight-aligned UTC timestamps (seconds)
+  const customStartTs = period === 'custom'
+    ? Math.floor(new Date(customStart.getFullYear(), customStart.getMonth(), customStart.getDate()).getTime() / 1000)
+    : undefined;
+  const customEndTs = period === 'custom'
+    ? Math.floor(new Date(customEnd.getFullYear(), customEnd.getMonth(), customEnd.getDate()).getTime() / 1000) + 86400
+    : undefined;
+
   const selectedCity = getSelectedCity();
   const cityToQuery = selectedCity?.name || defaultCity;
 
-  const trendsQuery = useWeatherTrends(cityToQuery || undefined, period);
-  const dailyQuery = useDailyHistory(cityToQuery || undefined, period);
+  const trendsQuery = useWeatherTrends(cityToQuery || undefined, period, customStartTs, customEndTs);
+  const dailyQuery = useDailyHistory(cityToQuery || undefined, period, customStartTs, customEndTs);
 
   const handlePeriodChange = async (newPeriod: HistoryPeriod) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
     }
     setPeriod(newPeriod);
+    setShowStartPicker(false);
+    setShowEndPicker(false);
   };
+
+  const handleStartDateChange = (_event: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowStartPicker(false);
+    if (date) setCustomStart(date);
+  };
+
+  const handleEndDateChange = (_event: DateTimePickerEvent, date?: Date) => {
+    if (Platform.OS === 'android') setShowEndPicker(false);
+    if (date) setCustomEnd(date);
+  };
+
+  // Validation for custom range
+  const customRangeValid = customStart < customEnd
+    && (customEnd.getTime() - customStart.getTime()) / 86400000 <= 365
+    && customEnd <= yesterday;
 
   const handleChartTypeChange = async (type: HistoryChartType) => {
     if (Platform.OS !== 'web') {
@@ -181,6 +221,58 @@ export default function HistoryScreen() {
           </Pressable>
         ))}
       </View>
+
+      {/* Custom Date Range Pickers */}
+      {period === 'custom' && (
+        <View style={[styles.datePickerSection, { backgroundColor: colors.card }]}>
+          <Pressable
+            style={styles.dateRow}
+            onPress={() => { setShowStartPicker(!showStartPicker); setShowEndPicker(false); }}
+          >
+            <Text style={[styles.dateLabel, { color: colors.textSecondary }]}>Start</Text>
+            <Text style={[styles.dateValue, { color: colors.text }]}>
+              {customStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </Text>
+          </Pressable>
+          {showStartPicker && (
+            <DateTimePicker
+              value={customStart}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              maximumDate={customEnd}
+              onChange={handleStartDateChange}
+            />
+          )}
+
+          <View style={[styles.dateSeparator, { backgroundColor: colors.border }]} />
+
+          <Pressable
+            style={styles.dateRow}
+            onPress={() => { setShowEndPicker(!showEndPicker); setShowStartPicker(false); }}
+          >
+            <Text style={[styles.dateLabel, { color: colors.textSecondary }]}>End</Text>
+            <Text style={[styles.dateValue, { color: colors.text }]}>
+              {customEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </Text>
+          </Pressable>
+          {showEndPicker && (
+            <DateTimePicker
+              value={customEnd}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              minimumDate={customStart}
+              maximumDate={yesterday}
+              onChange={handleEndDateChange}
+            />
+          )}
+
+          {!customRangeValid && (
+            <Text style={styles.dateError}>
+              Invalid range. Max 365 days, end must be before today.
+            </Text>
+          )}
+        </View>
+      )}
 
       {/* Trend Summary Card */}
       {summary && (
@@ -486,6 +578,36 @@ const styles = StyleSheet.create({
   },
   dayStatText: {
     fontSize: 13,
+  },
+  datePickerSection: {
+    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  dateLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  dateValue: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  dateSeparator: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 4,
+  },
+  dateError: {
+    color: '#F44336',
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: 'center',
   },
   hint: { textAlign: 'center', fontSize: 12, marginTop: 24 },
 });
