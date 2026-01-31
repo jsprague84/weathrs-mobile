@@ -159,11 +159,11 @@ export default function HistoryScreen() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading && period !== 'custom') {
     return <Loading message="Loading history data..." />;
   }
 
-  if (error) {
+  if (error && period !== 'custom') {
     return (
       <ErrorDisplay
         title="Failed to load history"
@@ -272,6 +272,21 @@ export default function HistoryScreen() {
             </Text>
           )}
         </View>
+      )}
+
+      {/* Inline error for custom mode */}
+      {error && period === 'custom' && (
+        <View style={[styles.inlineError, { backgroundColor: colors.card }]}>
+          <Ionicons name="alert-circle" size={20} color="#F44336" />
+          <Text style={[styles.inlineErrorText, { color: colors.text }]}>
+            {error instanceof Error ? error.message : 'Failed to load history'}
+          </Text>
+        </View>
+      )}
+
+      {/* Loading indicator for custom mode */}
+      {isLoading && period === 'custom' && (
+        <Loading message="Loading history data..." />
       )}
 
       {/* Trend Summary Card */}
@@ -608,6 +623,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 8,
     textAlign: 'center',
+  },
+  inlineError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 10,
+  },
+  inlineErrorText: {
+    fontSize: 14,
+    flex: 1,
   },
   hint: { textAlign: 'center', fontSize: 12, marginTop: 24 },
 });
