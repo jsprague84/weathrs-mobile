@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, Alert, Activi
 import { useState, useEffect } from 'react';
 import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useSettingsStore, type ThemeMode } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import { useLocation, reverseGeocode, formatLocationQuery } from '@/hooks/useLocation';
@@ -15,7 +15,7 @@ import { useHaptics } from '@/hooks/useHaptics';
 import type { Units } from '@/types';
 
 export default function SettingsScreen() {
-  const { apiUrl, setApiUrl, defaultCity, setDefaultCity, units, setUnits } = useSettingsStore();
+  const { apiUrl, setApiUrl, defaultCity, setDefaultCity, units, setUnits, themeMode, setThemeMode } = useSettingsStore();
   const { cities, addCity, removeCity, selectCity, selectedCityId } = useCitiesStore();
   const { colors, isDark } = useTheme();
   const { selection, notification } = useHaptics();
@@ -51,6 +51,11 @@ export default function SettingsScreen() {
   const handleUnitChange = async (unit: Units) => {
     await selection();
     setUnits(unit);
+  };
+
+  const handleThemeChange = async (mode: ThemeMode) => {
+    await selection();
+    setThemeMode(mode);
   };
 
   const handleAddCity = async () => {
@@ -339,6 +344,42 @@ export default function SettingsScreen() {
                 ]}
               >
                 {unit === 'imperial' ? '°F' : unit === 'metric' ? '°C' : 'K'}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </Card>
+
+      <Card>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Appearance</Text>
+        <View style={styles.unitsContainer}>
+          {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => (
+            <Pressable
+              key={mode}
+              style={[
+                styles.unitButton,
+                {
+                  backgroundColor: isDark ? colors.surface : colors.background,
+                  borderColor: themeMode === mode ? colors.primary : 'transparent',
+                },
+                themeMode === mode && { backgroundColor: isDark ? colors.primaryLight : '#E3F2FD' },
+              ]}
+              onPress={() => handleThemeChange(mode)}
+            >
+              <Ionicons
+                name={mode === 'system' ? 'phone-portrait-outline' : mode === 'light' ? 'sunny-outline' : 'moon-outline'}
+                size={18}
+                color={themeMode === mode ? colors.primary : colors.textSecondary}
+                style={{ marginBottom: 4 }}
+              />
+              <Text
+                style={[
+                  styles.unitButtonText,
+                  { color: themeMode === mode ? colors.primary : colors.textSecondary },
+                  themeMode === mode && styles.unitButtonTextActive,
+                ]}
+              >
+                {mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark'}
               </Text>
             </Pressable>
           ))}

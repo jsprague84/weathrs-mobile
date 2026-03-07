@@ -8,6 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Units } from '@/types';
 import api from '@/services/api';
 
+export type ThemeMode = 'system' | 'light' | 'dark';
+
 interface SettingsState {
   // API Configuration
   apiUrl: string;
@@ -19,6 +21,10 @@ interface SettingsState {
 
   units: Units;
   setUnits: (units: Units) => void;
+
+  // Appearance
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
 
   // Initialization
   isHydrated: boolean;
@@ -42,6 +48,10 @@ const settingsStore = create<SettingsState>()(
       units: 'imperial',
       setUnits: (units: Units) => set({ units }),
 
+      // Appearance
+      themeMode: 'system',
+      setThemeMode: (mode: ThemeMode) => set({ themeMode: mode }),
+
       // Initialization
       isHydrated: false,
       initialize: () => {
@@ -59,6 +69,7 @@ const settingsStore = create<SettingsState>()(
         apiUrl: state.apiUrl,
         defaultCity: state.defaultCity,
         units: state.units,
+        themeMode: state.themeMode,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -77,6 +88,7 @@ export const useSettingsStore = settingsStore;
 export const useApiUrl = () => settingsStore((s) => s.apiUrl);
 export const useDefaultCity = () => settingsStore((s) => s.defaultCity);
 export const useUnits = () => settingsStore((s) => s.units);
+export const useThemeMode = () => settingsStore((s) => s.themeMode);
 export const useIsHydrated = () => settingsStore((s) => s.isHydrated);
 
 // Action selectors (stable references)
@@ -84,5 +96,6 @@ export const useSettingsActions = () => settingsStore((s) => ({
   setApiUrl: s.setApiUrl,
   setDefaultCity: s.setDefaultCity,
   setUnits: s.setUnits,
+  setThemeMode: s.setThemeMode,
   initialize: s.initialize,
 }));

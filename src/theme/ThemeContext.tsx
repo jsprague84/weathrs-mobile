@@ -4,6 +4,7 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
+import { useThemeMode } from '@/stores/settingsStore';
 import { Colors, type ThemeColors } from './colors';
 
 interface ThemeContextType {
@@ -20,7 +21,11 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const systemColorScheme = useColorScheme();
-  const colorScheme = systemColorScheme ?? 'light';
+  const themeMode = useThemeMode();
+
+  const colorScheme = themeMode === 'system'
+    ? (systemColorScheme ?? 'light')
+    : themeMode;
   const isDark = colorScheme === 'dark';
 
   const value = useMemo(
