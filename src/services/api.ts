@@ -24,6 +24,14 @@ import type {
   HistoryPeriod,
 } from '@/types';
 
+/** Per-endpoint timeout presets (ms) */
+const TIMEOUT = {
+  FAST: 10_000,      // Weather, health
+  STANDARD: 15_000,  // Default
+  FORECAST: 20_000,  // Forecast endpoints
+  HEAVY: 30_000,     // History, trends
+} as const;
+
 class WeathrsApi {
   private baseUrl: string;
   private apiKey: string | null = null;
@@ -59,7 +67,7 @@ class WeathrsApi {
     }
 
     const controller = new AbortController();
-    const timeoutMs = options?.timeout ?? 15000;
+    const timeoutMs = options?.timeout ?? TIMEOUT.STANDARD;
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
@@ -87,7 +95,7 @@ class WeathrsApi {
 
   // Health check
   async health(): Promise<{ status: string }> {
-    return this.request('/health');
+    return this.request('/health', { timeout: TIMEOUT.FAST });
   }
 
   // Current weather
@@ -96,11 +104,11 @@ class WeathrsApi {
     if (city) params.append('city', city);
     if (units) params.append('units', units);
     const query = params.toString();
-    return this.request(`/weather${query ? `?${query}` : ''}`);
+    return this.request(`/weather${query ? `?${query}` : ''}`, { timeout: TIMEOUT.FAST });
   }
 
   async getCurrentWeatherByCity(city: string): Promise<CurrentWeather> {
-    return this.request(`/weather/${encodeURIComponent(city)}`);
+    return this.request(`/weather/${encodeURIComponent(city)}`, { timeout: TIMEOUT.FAST });
   }
 
   // Full forecast (includes current, hourly, daily)
@@ -109,11 +117,11 @@ class WeathrsApi {
     if (city) params.append('city', city);
     if (units) params.append('units', units);
     const query = params.toString();
-    return this.request(`/forecast${query ? `?${query}` : ''}`);
+    return this.request(`/forecast${query ? `?${query}` : ''}`, { timeout: TIMEOUT.FORECAST });
   }
 
   async getFullForecastByCity(city: string): Promise<FullForecast> {
-    return this.request(`/forecast/${encodeURIComponent(city)}`);
+    return this.request(`/forecast/${encodeURIComponent(city)}`, { timeout: TIMEOUT.FORECAST });
   }
 
   async getDailyForecast(city?: string, units?: Units): Promise<{ daily: DailyForecast[] }> {
@@ -121,11 +129,11 @@ class WeathrsApi {
     if (city) params.append('city', city);
     if (units) params.append('units', units);
     const query = params.toString();
-    return this.request(`/forecast/daily${query ? `?${query}` : ''}`);
+    return this.request(`/forecast/daily${query ? `?${query}` : ''}`, { timeout: TIMEOUT.FORECAST });
   }
 
   async getDailyForecastByCity(city: string): Promise<{ daily: DailyForecast[] }> {
-    return this.request(`/forecast/daily/${encodeURIComponent(city)}`);
+    return this.request(`/forecast/daily/${encodeURIComponent(city)}`, { timeout: TIMEOUT.FORECAST });
   }
 
   async getHourlyForecast(city?: string, units?: Units): Promise<{ hourly: HourlyForecast[] }> {
@@ -133,16 +141,16 @@ class WeathrsApi {
     if (city) params.append('city', city);
     if (units) params.append('units', units);
     const query = params.toString();
-    return this.request(`/forecast/hourly${query ? `?${query}` : ''}`);
+    return this.request(`/forecast/hourly${query ? `?${query}` : ''}`, { timeout: TIMEOUT.FORECAST });
   }
 
   async getHourlyForecastByCity(city: string): Promise<{ hourly: HourlyForecast[] }> {
-    return this.request(`/forecast/hourly/${encodeURIComponent(city)}`);
+    return this.request(`/forecast/hourly/${encodeURIComponent(city)}`, { timeout: TIMEOUT.FORECAST });
   }
 
   // Scheduler
   async getSchedulerStatus(): Promise<SchedulerStatus> {
-    return this.request('/scheduler/status');
+    return this.request('/scheduler/status', { timeout: TIMEOUT.FAST });
   }
 
   async getSchedulerJobs(): Promise<JobListResponse> {
@@ -186,7 +194,7 @@ class WeathrsApi {
     params.append('start', start.toString());
     params.append('end', end.toString());
     if (units) params.append('units', units);
-    return this.request(`/history/${encodeURIComponent(city)}?${params.toString()}`);
+    return this.request(`/history/${encodeURIComponent(city)}?${params.toString()}`, { timeout: TIMEOUT.HEAVY });
   }
 
   async getDailyHistory(city: string, start: number, end: number, units?: Units): Promise<DailyHistoryResponse> {
@@ -194,7 +202,7 @@ class WeathrsApi {
     params.append('start', start.toString());
     params.append('end', end.toString());
     if (units) params.append('units', units);
-    return this.request(`/history/${encodeURIComponent(city)}/daily?${params.toString()}`);
+    return this.request(`/history/${encodeURIComponent(city)}/daily?${params.toString()}`, { timeout: TIMEOUT.HEAVY });
   }
 
   async getWeatherTrends(
@@ -212,7 +220,7 @@ class WeathrsApi {
       params.append('period', period);
     }
     if (units) params.append('units', units);
-    return this.request(`/history/${encodeURIComponent(city)}/trends?${params.toString()}`);
+    return this.request(`/history/${encodeURIComponent(city)}/trends?${params.toString()}`, { timeout: TIMEOUT.HEAVY });
   }
 
   // Device registration for push notifications
