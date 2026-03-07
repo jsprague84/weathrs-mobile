@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCard, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { WeatherCard, CitySelector, Loading, ErrorDisplay, Skeleton } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
 
 export default function HomeScreen() {
@@ -48,7 +48,13 @@ export default function HomeScreen() {
   }
 
   if (isLoading) {
-    return <Loading message={`Loading weather for ${cityToQuery}...`} />;
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={{ paddingTop: 24 }}>
+          <Skeleton.Card />
+        </View>
+      </View>
+    );
   }
 
   if (error) {
