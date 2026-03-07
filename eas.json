@@ -28,6 +28,12 @@
       "android": {
         "buildType": "app-bundle"
       }
+    },
+    "release-apk": {
+      "extends": "production",
+      "android": {
+        "buildType": "apk"
+      }
     }
   }
 }
