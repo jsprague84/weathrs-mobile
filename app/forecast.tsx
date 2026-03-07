@@ -96,6 +96,9 @@ export default function ForecastScreen() {
             activeView === 'daily' && { backgroundColor: colors.card },
           ]}
           onPress={() => handleViewChange('daily')}
+          accessibilityRole="tab"
+          accessibilityLabel="7-Day forecast"
+          accessibilityState={{ selected: activeView === 'daily' }}
         >
           <Text
             style={[
@@ -113,6 +116,9 @@ export default function ForecastScreen() {
             activeView === 'hourly' && { backgroundColor: colors.card },
           ]}
           onPress={() => handleViewChange('hourly')}
+          accessibilityRole="tab"
+          accessibilityLabel="Hourly forecast"
+          accessibilityState={{ selected: activeView === 'hourly' }}
         >
           <Text
             style={[

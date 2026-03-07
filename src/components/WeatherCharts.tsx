@@ -227,6 +227,9 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               },
             ]}
             onPress={() => handleChartChange(type)}
+            accessibilityRole="tab"
+            accessibilityLabel={label}
+            accessibilityState={{ selected: activeChart === type }}
           >
             <Text
               style={[

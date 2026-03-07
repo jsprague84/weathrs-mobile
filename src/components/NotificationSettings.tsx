@@ -284,6 +284,7 @@ export function NotificationSettings() {
               onValueChange={handleToggleEnabled}
               trackColor={{ false: colors.border, true: colors.primary + '80' }}
               thumbColor={enabled ? colors.primary : colors.textMuted}
+              accessibilityLabel="Toggle all notifications"
             />
           </View>
 
@@ -300,6 +301,7 @@ export function NotificationSettings() {
               disabled={!enabled}
               trackColor={{ false: colors.border, true: colors.primary + '80' }}
               thumbColor={dailyForecastEnabled && enabled ? colors.primary : colors.textMuted}
+              accessibilityLabel="Toggle daily forecast notifications"
             />
           </View>
 
@@ -316,6 +318,7 @@ export function NotificationSettings() {
               disabled={!enabled}
               trackColor={{ false: colors.border, true: colors.primary + '80' }}
               thumbColor={alertsEnabled && enabled ? colors.primary : colors.textMuted}
+              accessibilityLabel="Toggle weather alert notifications"
             />
           </View>
 
@@ -354,6 +357,8 @@ export function NotificationSettings() {
           <Pressable
             style={styles.unregisterButton}
             onPress={handleUnregister}
+            accessibilityLabel="Disable notifications"
+            accessibilityRole="button"
           >
             <Text style={[styles.unregisterText, { color: colors.error }]}>
               Disable Notifications

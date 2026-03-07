@@ -46,6 +46,8 @@ export function CitySelector({ onAddCity }: CitySelectorProps) {
       <Pressable
         style={[styles.selector, { backgroundColor: isDark ? colors.surface : colors.card }]}
         onPress={handleOpenModal}
+        accessibilityLabel="Change city"
+        accessibilityRole="button"
       >
         <Ionicons name="location" size={16} color={colors.primary} />
         <Text style={[styles.selectorText, { color: colors.text }]} numberOfLines={1}>
@@ -87,6 +89,8 @@ export function CitySelector({ onAddCity }: CitySelectorProps) {
                     },
                   ]}
                   onPress={() => handleSelectCity(city)}
+                  accessibilityRole="button"
+                  accessibilityLabel={city.displayName || city.name}
                 >
                   <View style={styles.cityInfo}>
                     <Text
@@ -115,6 +119,8 @@ export function CitySelector({ onAddCity }: CitySelectorProps) {
               <Pressable
                 style={[styles.addButton, { borderTopColor: colors.border }]}
                 onPress={handleAddCity}
+                accessibilityLabel="Add new city"
+                accessibilityRole="button"
               >
                 <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
                 <Text style={[styles.addButtonText, { color: colors.primary }]}>

@@ -111,6 +111,9 @@ export const DailyForecastCard = memo(function DailyForecastCard({ forecast, uni
         backgroundColor: colors.card,
         shadowOpacity: isDark ? 0.2 : 0.05,
       }]}
+      accessibilityRole="button"
+      accessibilityLabel="Expand forecast details"
+      accessibilityState={{ expanded }}
     >
       {/* Collapsed View - Main Row */}
       <View style={styles.mainRow}>

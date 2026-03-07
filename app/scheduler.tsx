@@ -435,10 +435,10 @@ function JobCard({
           <Text style={[styles.jobName, { color: colors.text }]}>{job.name}</Text>
         </View>
         <View style={styles.jobActions}>
-          <Pressable onPress={onEdit} hitSlop={8} style={styles.actionButton}>
+          <Pressable onPress={onEdit} hitSlop={8} style={styles.actionButton} accessibilityLabel="Edit job" accessibilityRole="button">
             <Ionicons name="pencil-outline" size={18} color={colors.primary} />
           </Pressable>
-          <Pressable onPress={onDelete} hitSlop={8} style={styles.actionButton}>
+          <Pressable onPress={onDelete} hitSlop={8} style={styles.actionButton} accessibilityLabel="Delete job" accessibilityRole="button">
             <Ionicons name="trash-outline" size={18} color={colors.error} />
           </Pressable>
         </View>
@@ -473,6 +473,7 @@ function JobCard({
           onValueChange={onToggle}
           trackColor={{ false: colors.border, true: colors.success + '80' }}
           thumbColor={job.enabled ? colors.success : colors.textMuted}
+          accessibilityLabel="Enable job"
         />
         <Text style={[styles.enabledLabel, { color: job.enabled ? colors.success : colors.textMuted }]}>
           {job.enabled ? 'Active' : 'Paused'}
@@ -808,6 +809,8 @@ export default function SchedulerScreen() {
             <Pressable
               style={[styles.addButton, { backgroundColor: colors.primary }]}
               onPress={handleAddJob}
+              accessibilityLabel="Add new job"
+              accessibilityRole="button"
             >
               <Ionicons name="add" size={20} color="#FFF" />
             </Pressable>
