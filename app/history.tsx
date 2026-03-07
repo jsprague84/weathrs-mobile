@@ -2,7 +2,7 @@
  * History screen - Historical weather trends and data
  */
 
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
@@ -42,7 +42,9 @@ function getTemperatureUnit(units: string): string {
   }
 }
 
-function getTrendIcon(trend: string): string {
+type IoniconName = ComponentProps<typeof Ionicons>['name'];
+
+function getTrendIcon(trend: string): IoniconName {
   switch (trend) {
     case 'rising':
       return 'trending-up';
@@ -298,7 +300,7 @@ export default function HistoryScreen() {
             {/* Temperature Trend */}
             <View style={styles.summaryItem}>
               <Ionicons
-                name={getTrendIcon(summary.temp_trend) as any}
+                name={getTrendIcon(summary.temp_trend)}
                 size={24}
                 color={getTrendColor(summary.temp_trend)}
               />
