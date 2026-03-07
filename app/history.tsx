@@ -12,7 +12,7 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import { useTheme } from '@/theme';
 import { useDailyHistory, useWeatherTrends } from '@/hooks/useWeather';
-import { HistoryCharts, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { HistoryCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary } from '@/components';
 import type { HistoryPeriod, DailyHistorySummary } from '@/types';
 
 const PERIODS: { value: HistoryPeriod; label: string }[] = [
@@ -393,11 +393,13 @@ export default function HistoryScreen() {
       {/* History Chart */}
       {days.length > 0 && (
         <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
-          <HistoryCharts
-            data={days}
-            chartType={chartType}
-            units={units}
-          />
+          <ErrorBoundary>
+            <HistoryCharts
+              data={days}
+              chartType={chartType}
+              units={units}
+            />
+          </ErrorBoundary>
         </View>
       )}
 

@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCharts, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { WeatherCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
 
 export default function ChartsScreen() {
@@ -80,11 +80,13 @@ export default function ChartsScreen() {
       </Text>
 
       {forecast && (
-        <WeatherCharts
-          hourlyData={forecast.hourly}
-          dailyData={forecast.daily}
-          units={units}
-        />
+        <ErrorBoundary>
+          <WeatherCharts
+            hourlyData={forecast.hourly}
+            dailyData={forecast.daily}
+            units={units}
+          />
+        </ErrorBoundary>
       )}
 
       <Text style={[styles.hint, { color: colors.textMuted }]}>

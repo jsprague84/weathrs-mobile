@@ -7,4 +7,4 @@ export { HistoryCharts } from './HistoryCharts';
 export { NotificationSettings } from './NotificationSettings';
 
 // UI Components
-export { Button, Card, Loading, ErrorDisplay } from './ui';
+export { Button, Card, Loading, ErrorDisplay, ErrorBoundary } from './ui';
