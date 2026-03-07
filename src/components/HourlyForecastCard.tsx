@@ -2,6 +2,7 @@
  * Hourly forecast card component
  */
 
+import { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme';
 import type { HourlyForecast, Units } from '@/types';
@@ -65,7 +66,7 @@ function getWindDirection(degrees: number): string {
   return directions[index];
 }
 
-export function HourlyForecastCard({ forecast, units = 'imperial' }: HourlyForecastCardProps) {
+export const HourlyForecastCard = memo(function HourlyForecastCard({ forecast, units = 'imperial' }: HourlyForecastCardProps) {
   const { colors, isDark } = useTheme();
   const tempUnit = getTemperatureUnit(units);
   const speedUnit = getSpeedUnit(units);
@@ -128,7 +129,7 @@ export function HourlyForecastCard({ forecast, units = 'imperial' }: HourlyForec
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

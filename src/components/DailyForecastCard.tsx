@@ -2,7 +2,7 @@
  * Expandable daily forecast card component
  */
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, LayoutAnimation, UIManager } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme';
@@ -89,7 +89,7 @@ function getMoonPhaseName(phase: number): string {
   return 'Waning Crescent';
 }
 
-export function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecastCardProps) {
+export const DailyForecastCard = memo(function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecastCardProps) {
   const { colors, isDark } = useTheme();
   const [expanded, setExpanded] = useState(false);
   const tempUnit = getTemperatureUnit(units);
@@ -263,7 +263,7 @@ export function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecas
       )}
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {
