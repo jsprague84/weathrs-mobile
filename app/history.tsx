@@ -2,7 +2,7 @@
  * History screen - Historical weather trends and data
  */
 
-import { useState, useCallback, type ComponentProps } from 'react';
+import { useState, useCallback, useTransition, type ComponentProps } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
@@ -81,6 +81,7 @@ export default function HistoryScreen() {
   const [period, setPeriod] = useState<HistoryPeriod>('7d');
   const [chartType, setChartType] = useState<HistoryChartType>('temperature');
   const [showAllDays, setShowAllDays] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   // Custom date range state
   const thirtyDaysAgo = new Date();
@@ -131,8 +132,10 @@ export default function HistoryScreen() {
 
   const handleChartTypeChange = useCallback(async (type: HistoryChartType) => {
     await selection();
-    setChartType(type);
-  }, [selection]);
+    startTransition(() => {
+      setChartType(type);
+    });
+  }, [selection, startTransition]);
 
   const handleAddCity = useCallback(() => {
     router.push('/settings');
@@ -394,7 +397,7 @@ export default function HistoryScreen() {
 
       {/* History Chart */}
       {days.length > 0 && (
-        <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
+        <View style={[styles.chartCard, { backgroundColor: colors.card, opacity: isPending ? 0.7 : 1 }]}>
           <ErrorBoundary>
             <HistoryCharts
               data={days}

@@ -2,7 +2,7 @@
  * Forecast screen - Daily and hourly forecast display
  */
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { View, Text, StyleSheet, RefreshControl, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ export default function ForecastScreen() {
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const [activeView, setActiveView] = useState<ForecastView>('daily');
+  const [isPending, startTransition] = useTransition();
 
   const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
   const { selection } = useHaptics();
@@ -43,7 +44,9 @@ export default function ForecastScreen() {
 
   const handleViewChange = async (view: ForecastView) => {
     await selection();
-    setActiveView(view);
+    startTransition(() => {
+      setActiveView(view);
+    });
   };
 
   const handleAddCity = () => {
@@ -132,6 +135,7 @@ export default function ForecastScreen() {
         </Pressable>
       </View>
 
+      <View style={{ flex: 1, opacity: isPending ? 0.7 : 1 }}>
       {activeView === 'daily' ? (
         <FlashList
           data={dailyQuery.data?.daily ?? []}
@@ -189,6 +193,7 @@ export default function ForecastScreen() {
           }
         />
       )}
+      </View>
     </View>
   );
 }

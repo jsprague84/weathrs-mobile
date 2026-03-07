@@ -3,7 +3,7 @@
  * Uses react-native-gifted-charts for rendering
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useTransition } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
 import { useTheme } from '@/theme';
@@ -107,11 +107,14 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
   const { colors, isDark } = useTheme();
   const { selection } = useHaptics();
   const [activeChart, setActiveChart] = useState<ChartType>('temperature');
+  const [isPending, startTransition] = useTransition();
 
   const handleChartChange = useCallback(async (chart: ChartType) => {
     await selection();
-    setActiveChart(chart);
-  }, [selection]);
+    startTransition(() => {
+      setActiveChart(chart);
+    });
+  }, [selection, startTransition]);
 
   const hourlySlice = useMemo(() => hourlyData?.slice(0, 24) || [], [hourlyData]);
   const dailySlice = useMemo(() => dailyData?.slice(0, 7) || [], [dailyData]);
@@ -248,7 +251,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
 
       {/* Charts */}
       <View
-        style={[styles.chartCard, { backgroundColor: colors.card }]}
+        style={[styles.chartCard, { backgroundColor: colors.card, opacity: isPending ? 0.7 : 1 }]}
         accessibilityLabel={`${activeChart} chart showing 24-hour and 7-day data`}
         accessibilityRole="summary"
       >
