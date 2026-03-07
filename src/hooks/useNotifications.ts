@@ -11,6 +11,8 @@ import { Platform, Alert } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import api from '@/services/api';
+import { useNotificationsStore } from '@/stores/notificationsStore';
 
 /**
  * Check if we're running in Expo Go (as opposed to a development build or standalone app)
@@ -71,6 +73,9 @@ export function useNotifications(): UseNotificationsReturn {
   const [notification, setNotification] = useState<Notifications.Notification | null>(null);
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
+  const tokenListener = useRef<Notifications.EventSubscription | null>(null);
+
+  const { setExpoPushToken } = useNotificationsStore();
 
   // Set up notification listeners
   useEffect(() => {
@@ -86,6 +91,26 @@ export function useNotifications(): UseNotificationsReturn {
       console.log('Notification response:', data);
     });
 
+    // Listen for push token changes (token rotation)
+    tokenListener.current = Notifications.addPushTokenListener((tokenData) => {
+      const newToken = tokenData.data;
+      console.log('[Notifications] Push token changed:', newToken);
+
+      // Update local state and store
+      setState((prev) => ({ ...prev, expoPushToken: newToken }));
+      setExpoPushToken(newToken);
+
+      // Re-register with the backend API
+      api.registerDevice({
+        token: newToken,
+        platform: Platform.OS as 'ios' | 'android',
+      }).then(() => {
+        console.log('[Notifications] Re-registered with new token');
+      }).catch((err) => {
+        console.error('[Notifications] Failed to re-register after token change:', err);
+      });
+    });
+
     // Check current permission status
     checkPermissionStatus();
 
@@ -96,8 +121,11 @@ export function useNotifications(): UseNotificationsReturn {
       if (responseListener.current) {
         responseListener.current.remove();
       }
+      if (tokenListener.current) {
+        tokenListener.current.remove();
+      }
     };
-  }, []);
+  }, [setExpoPushToken]);
 
   const checkPermissionStatus = async () => {
     try {
