@@ -32,8 +32,19 @@ export default function SettingsScreen() {
   const hasApiChanges = localApiUrl !== apiUrl;
 
   const handleSaveApi = async () => {
+    const trimmed = localApiUrl.trim();
+    if (!trimmed) {
+      Alert.alert('Error', 'API URL cannot be empty');
+      return;
+    }
+    try {
+      new URL(trimmed);
+    } catch {
+      Alert.alert('Error', 'Please enter a valid URL (e.g., https://weathrs.js-node.cc)');
+      return;
+    }
     await notification(NotificationFeedbackType.Success);
-    setApiUrl(localApiUrl);
+    setApiUrl(trimmed);
     Alert.alert('Saved', 'API settings have been updated');
   };
 
@@ -46,6 +57,10 @@ export default function SettingsScreen() {
     const cityName = newCityName.trim();
     if (!cityName) {
       Alert.alert('Error', 'Please enter a city name or zip code');
+      return;
+    }
+    if (cityName.length > 100) {
+      Alert.alert('Error', 'City name is too long (max 100 characters)');
       return;
     }
 
@@ -200,6 +215,7 @@ export default function SettingsScreen() {
             value={newCityName}
             onChangeText={setNewCityName}
             placeholder="City name or zip code"
+            maxLength={100}
             placeholderTextColor={colors.textMuted}
             onSubmitEditing={handleAddCity}
             returnKeyType="done"
