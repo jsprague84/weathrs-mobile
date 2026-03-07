@@ -3,6 +3,7 @@
  * Uses react-native-gifted-charts for rendering
  */
 
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
 import { useTheme } from '@/theme';
@@ -85,6 +86,45 @@ function formatDate(dateStr: string): string {
 export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryChartsProps) {
   const { colors } = useTheme();
 
+  // Show labels every N items to avoid crowding
+  const labelInterval = data.length > 14 ? 3 : data.length > 7 ? 2 : 1;
+
+  // Memoize all chart data sets
+  const highData = useMemo(() => data.map((d, i) => ({
+    value: Math.round(d.temp_max),
+    label: i % labelInterval === 0 ? formatDate(d.date) : '',
+  })), [data, labelInterval]);
+
+  const lowData = useMemo(() => data.map((d, i) => ({
+    value: Math.round(d.temp_min),
+    label: i % labelInterval === 0 ? formatDate(d.date) : '',
+  })), [data, labelInterval]);
+
+  const avgData = useMemo(() => data.map((d, i) => ({
+    value: Math.round(d.temp_avg),
+    label: i % labelInterval === 0 ? formatDate(d.date) : '',
+  })), [data, labelInterval]);
+
+  const precipData = useMemo(() => data.map((d, i) => ({
+    value: Math.round(d.precipitation_total * 10) / 10,
+    label: i % labelInterval === 0 ? formatDate(d.date) : '',
+    frontColor: 'rgba(33, 150, 243, 0.7)',
+  })), [data, labelInterval]);
+
+  const humidityData = useMemo(() => data.map((d, i) => ({
+    value: Math.round(d.humidity_avg),
+    label: i % labelInterval === 0 ? formatDate(d.date) : '',
+  })), [data, labelInterval]);
+
+  const windData = useMemo(() => data.map((d, i) => ({
+    value: Math.round(d.wind_speed_avg * 10) / 10,
+    label: i % labelInterval === 0 ? formatDate(d.date) : '',
+  })), [data, labelInterval]);
+
+  // Memoize y-axis calculations
+  const tempYAxisProps = useMemo(() => getYAxisProps([highData, lowData, avgData], 200), [highData, lowData, avgData]);
+  const windYAxisProps = useMemo(() => getYAxisProps([windData], 200), [windData]);
+
   if (data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -113,25 +153,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
     height: 200,
   };
 
-  // Show labels every N items to avoid crowding
-  const labelInterval = data.length > 14 ? 3 : data.length > 7 ? 2 : 1;
-
   if (chartType === 'temperature') {
-    const highData = data.map((d, i) => ({
-      value: Math.round(d.temp_max),
-      label: i % labelInterval === 0 ? formatDate(d.date) : '',
-    }));
-
-    const lowData = data.map((d, i) => ({
-      value: Math.round(d.temp_min),
-      label: i % labelInterval === 0 ? formatDate(d.date) : '',
-    }));
-
-    const avgData = data.map((d, i) => ({
-      value: Math.round(d.temp_avg),
-      label: i % labelInterval === 0 ? formatDate(d.date) : '',
-    }));
-
     return (
       <View>
         <Text style={[styles.chartTitle, { color: colors.text }]}>
@@ -143,7 +165,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
             data2={lowData}
             data3={avgData}
             {...commonLineProps}
-            {...getYAxisProps([highData, lowData, avgData], 200)}
+            {...tempYAxisProps}
             color="#F44336"
             color2="#2196F3"
             color3={colors.primary}
@@ -176,12 +198,6 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
   }
 
   if (chartType === 'precipitation') {
-    const precipData = data.map((d, i) => ({
-      value: Math.round(d.precipitation_total * 10) / 10,
-      label: i % labelInterval === 0 ? formatDate(d.date) : '',
-      frontColor: 'rgba(33, 150, 243, 0.7)',
-    }));
-
     return (
       <View>
         <Text style={[styles.chartTitle, { color: colors.text }]}>
@@ -207,11 +223,6 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
   }
 
   if (chartType === 'humidity') {
-    const humidityData = data.map((d, i) => ({
-      value: Math.round(d.humidity_avg),
-      label: i % labelInterval === 0 ? formatDate(d.date) : '',
-    }));
-
     return (
       <View>
         <Text style={[styles.chartTitle, { color: colors.text }]}>
@@ -239,11 +250,6 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
   }
 
   if (chartType === 'wind') {
-    const windData = data.map((d, i) => ({
-      value: Math.round(d.wind_speed_avg * 10) / 10,
-      label: i % labelInterval === 0 ? formatDate(d.date) : '',
-    }));
-
     return (
       <View>
         <Text style={[styles.chartTitle, { color: colors.text }]}>
@@ -253,7 +259,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
           <LineChart
             data={windData}
             {...commonLineProps}
-            {...getYAxisProps([windData], 200)}
+            {...windYAxisProps}
             color="#9C27B0"
             dataPointsColor="#9C27B0"
             areaChart

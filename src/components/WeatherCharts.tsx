@@ -3,7 +3,7 @@
  * Uses react-native-gifted-charts for rendering
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
 import * as Haptics from 'expo-haptics';
@@ -11,6 +11,13 @@ import { useTheme } from '@/theme';
 import type { HourlyForecast, DailyForecast, Units } from '@/types';
 
 type ChartType = 'temperature' | 'precipitation' | 'humidity' | 'wind';
+
+const CHART_BUTTONS: { type: ChartType; label: string }[] = [
+  { type: 'temperature', label: 'Temp' },
+  { type: 'precipitation', label: 'Precip' },
+  { type: 'humidity', label: 'Humidity' },
+  { type: 'wind', label: 'Wind' },
+];
 
 interface WeatherChartsProps {
   hourlyData?: HourlyForecast[];
@@ -100,15 +107,76 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
   const { colors, isDark } = useTheme();
   const [activeChart, setActiveChart] = useState<ChartType>('temperature');
 
-  const handleChartChange = async (chart: ChartType) => {
+  const handleChartChange = useCallback(async (chart: ChartType) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
     }
     setActiveChart(chart);
-  };
+  }, []);
 
-  const hourlySlice = hourlyData?.slice(0, 24) || [];
-  const dailySlice = dailyData?.slice(0, 7) || [];
+  const hourlySlice = useMemo(() => hourlyData?.slice(0, 24) || [], [hourlyData]);
+  const dailySlice = useMemo(() => dailyData?.slice(0, 7) || [], [dailyData]);
+
+  // Build data for gifted-charts (LineChart uses {value, label} items)
+  const hourlyTempData = useMemo(() => hourlySlice.map((h, i) => ({
+    value: Math.round(h.temperature),
+    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
+    dataPointText: i % 4 === 0 ? `${Math.round(h.temperature)}` : undefined,
+  })), [hourlySlice]);
+
+  const hourlyFeelsLikeData = useMemo(() => hourlySlice.map((h, i) => ({
+    value: Math.round(h.feels_like),
+    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
+  })), [hourlySlice]);
+
+  const hourlyPrecipData = useMemo(() => hourlySlice.map((h, i) => ({
+    value: Math.round(h.precipitation_probability * 100),
+    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
+    frontColor: 'rgba(33, 150, 243, 0.7)',
+  })), [hourlySlice]);
+
+  const hourlyHumidityData = useMemo(() => hourlySlice.map((h, i) => ({
+    value: h.humidity,
+    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
+  })), [hourlySlice]);
+
+  const hourlyWindData = useMemo(() => hourlySlice.map((h, i) => ({
+    value: Math.round(h.wind_speed),
+    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
+  })), [hourlySlice]);
+
+  // Daily data
+  const dailyHighData = useMemo(() => dailySlice.map((d) => ({
+    value: Math.round(d.temp_max),
+    label: formatDay(d.timestamp),
+  })), [dailySlice]);
+
+  const dailyLowData = useMemo(() => dailySlice.map((d) => ({
+    value: Math.round(d.temp_min),
+    label: formatDay(d.timestamp),
+  })), [dailySlice]);
+
+  const dailyPrecipData = useMemo(() => dailySlice.map((d) => ({
+    value: Math.round(d.precipitation_probability * 100),
+    label: formatDay(d.timestamp),
+    frontColor: 'rgba(33, 150, 243, 0.7)',
+  })), [dailySlice]);
+
+  const dailyHumidityData = useMemo(() => dailySlice.map((d) => ({
+    value: d.humidity,
+    label: formatDay(d.timestamp),
+  })), [dailySlice]);
+
+  const dailyWindData = useMemo(() => dailySlice.map((d) => ({
+    value: Math.round(d.wind_speed),
+    label: formatDay(d.timestamp),
+  })), [dailySlice]);
+
+  // Memoize y-axis calculations
+  const tempYAxisProps = useMemo(() => getYAxisProps([hourlyTempData, hourlyFeelsLikeData], 180), [hourlyTempData, hourlyFeelsLikeData]);
+  const dailyTempYAxisProps = useMemo(() => getYAxisProps([dailyHighData, dailyLowData], 180), [dailyHighData, dailyLowData]);
+  const windYAxisProps = useMemo(() => getYAxisProps([hourlyWindData], 180), [hourlyWindData]);
+  const dailyWindYAxisProps = useMemo(() => getYAxisProps([dailyWindData], 180), [dailyWindData]);
 
   if (hourlySlice.length === 0 && dailySlice.length === 0) {
     return (
@@ -119,68 +187,6 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
       </View>
     );
   }
-
-  // Build data for gifted-charts (LineChart uses {value, label} items)
-  const hourlyTempData = hourlySlice.map((h, i) => ({
-    value: Math.round(h.temperature),
-    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
-    dataPointText: i % 4 === 0 ? `${Math.round(h.temperature)}` : undefined,
-  }));
-
-  const hourlyFeelsLikeData = hourlySlice.map((h, i) => ({
-    value: Math.round(h.feels_like),
-    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
-  }));
-
-  const hourlyPrecipData = hourlySlice.map((h, i) => ({
-    value: Math.round(h.precipitation_probability * 100),
-    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
-    frontColor: 'rgba(33, 150, 243, 0.7)',
-  }));
-
-  const hourlyHumidityData = hourlySlice.map((h, i) => ({
-    value: h.humidity,
-    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
-  }));
-
-  const hourlyWindData = hourlySlice.map((h, i) => ({
-    value: Math.round(h.wind_speed),
-    label: i % 4 === 0 ? formatHour(h.timestamp) : '',
-  }));
-
-  // Daily data
-  const dailyHighData = dailySlice.map((d) => ({
-    value: Math.round(d.temp_max),
-    label: formatDay(d.timestamp),
-  }));
-
-  const dailyLowData = dailySlice.map((d) => ({
-    value: Math.round(d.temp_min),
-    label: formatDay(d.timestamp),
-  }));
-
-  const dailyPrecipData = dailySlice.map((d) => ({
-    value: Math.round(d.precipitation_probability * 100),
-    label: formatDay(d.timestamp),
-    frontColor: 'rgba(33, 150, 243, 0.7)',
-  }));
-
-  const dailyHumidityData = dailySlice.map((d) => ({
-    value: d.humidity,
-    label: formatDay(d.timestamp),
-  }));
-
-  const dailyWindData = dailySlice.map((d) => ({
-    value: Math.round(d.wind_speed),
-    label: formatDay(d.timestamp),
-  }));
-
-  const chartButtons: { type: ChartType; label: string }[] = [
-    { type: 'temperature', label: 'Temp' },
-    { type: 'precipitation', label: 'Precip' },
-    { type: 'humidity', label: 'Humidity' },
-    { type: 'wind', label: 'Wind' },
-  ];
 
   const lineChartCommon = {
     thickness: 2,
@@ -209,7 +215,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
         style={styles.tabScrollView}
         contentContainerStyle={styles.tabContainer}
       >
-        {chartButtons.map(({ type, label }) => (
+        {CHART_BUTTONS.map(({ type, label }) => (
           <Pressable
             key={type}
             style={[
@@ -250,7 +256,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={hourlyTempData}
                 data2={hourlyFeelsLikeData}
                 {...lineChartCommon}
-                {...getYAxisProps([hourlyTempData, hourlyFeelsLikeData], 180)}
+                {...tempYAxisProps}
                 color={colors.primary}
                 color2="#FF9800"
                 dataPointsColor={colors.primary}
@@ -281,7 +287,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={dailyHighData}
                 data2={dailyLowData}
                 {...lineChartCommon}
-                {...getYAxisProps([dailyHighData, dailyLowData], 180)}
+                {...dailyTempYAxisProps}
                 spacing={40}
                 color="#F44336"
                 color2="#2196F3"
@@ -405,7 +411,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               <LineChart
                 data={hourlyWindData}
                 {...lineChartCommon}
-                {...getYAxisProps([hourlyWindData], 180)}
+                {...windYAxisProps}
                 color="#9C27B0"
                 dataPointsColor="#9C27B0"
                 height={180}
@@ -419,7 +425,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               <LineChart
                 data={dailyWindData}
                 {...lineChartCommon}
-                {...getYAxisProps([dailyWindData], 180)}
+                {...dailyWindYAxisProps}
                 spacing={40}
                 color="#9C27B0"
                 dataPointsColor="#9C27B0"
