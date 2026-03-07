@@ -155,7 +155,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
 
   if (chartType === 'temperature') {
     return (
-      <View>
+      <View accessibilityLabel={`Temperature trend chart for ${data.length} days`} accessibilityRole="summary">
         <Text style={[styles.chartTitle, { color: colors.text }]}>
           Temperature Trend ({getTemperatureUnit(units)})
         </Text>
@@ -199,7 +199,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
 
   if (chartType === 'precipitation') {
     return (
-      <View>
+      <View accessibilityLabel={`Precipitation chart for ${data.length} days`} accessibilityRole="summary">
         <Text style={[styles.chartTitle, { color: colors.text }]}>
           Daily Precipitation (mm)
         </Text>
@@ -224,7 +224,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
 
   if (chartType === 'humidity') {
     return (
-      <View>
+      <View accessibilityLabel={`Humidity chart for ${data.length} days`} accessibilityRole="summary">
         <Text style={[styles.chartTitle, { color: colors.text }]}>
           Average Humidity (%)
         </Text>
@@ -251,7 +251,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
 
   if (chartType === 'wind') {
     return (
-      <View>
+      <View accessibilityLabel={`Wind speed chart for ${data.length} days`} accessibilityRole="summary">
         <Text style={[styles.chartTitle, { color: colors.text }]}>
           Average Wind Speed ({units === 'imperial' ? 'mph' : 'm/s'})
         </Text>

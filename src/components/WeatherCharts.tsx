@@ -247,7 +247,11 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
       </ScrollView>
 
       {/* Charts */}
-      <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
+      <View
+        style={[styles.chartCard, { backgroundColor: colors.card }]}
+        accessibilityLabel={`${activeChart} chart showing 24-hour and 7-day data`}
+        accessibilityRole="summary"
+      >
         {activeChart === 'temperature' && (
           <>
             <Text style={[styles.chartTitle, { color: colors.text }]}>
