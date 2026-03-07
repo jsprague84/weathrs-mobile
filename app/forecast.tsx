@@ -3,17 +3,16 @@
  */
 
 import { useState } from 'react';
-import { View, Text, StyleSheet, RefreshControl, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay } from '@/components';
-import { useCityToQuery } from '@/hooks/useCityToQuery';
+import { useCityToQuery, useHaptics } from '@/hooks';
 import type { DailyForecast, HourlyForecast } from '@/types';
 
 type ForecastView = 'daily' | 'hourly';
@@ -26,6 +25,7 @@ export default function ForecastScreen() {
   const [activeView, setActiveView] = useState<ForecastView>('daily');
 
   const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
+  const { selection } = useHaptics();
 
   const dailyQuery = useQuery({
     queryKey: ['forecast', 'daily', cityToQuery, units],
@@ -42,9 +42,7 @@ export default function ForecastScreen() {
   });
 
   const handleViewChange = async (view: ForecastView) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setActiveView(view);
   };
 

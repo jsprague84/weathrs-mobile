@@ -3,10 +3,10 @@
  */
 
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Modal, ScrollView, Platform } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { View, Text, StyleSheet, Pressable, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
+import { useHaptics } from '@/hooks/useHaptics';
 import { useCitiesStore, type SavedCity } from '@/stores/citiesStore';
 
 interface CitySelectorProps {
@@ -15,22 +15,19 @@ interface CitySelectorProps {
 
 export function CitySelector({ onAddCity }: CitySelectorProps) {
   const { colors, isDark } = useTheme();
+  const { selection } = useHaptics();
   const [modalVisible, setModalVisible] = useState(false);
   const { cities, selectedCityId, selectCity, getSelectedCity } = useCitiesStore();
 
   const selectedCity = getSelectedCity();
 
   const handleOpenModal = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setModalVisible(true);
   };
 
   const handleSelectCity = async (city: SavedCity) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     selectCity(city.id);
     setModalVisible(false);
   };

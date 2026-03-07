@@ -5,12 +5,11 @@
 import { useState, useCallback, type ComponentProps } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
-import { useCityToQuery } from '@/hooks/useCityToQuery';
+import { useCityToQuery, useHaptics } from '@/hooks';
 import { useTheme } from '@/theme';
 import { useDailyHistory, useWeatherTrends } from '@/hooks/useWeather';
 import { HistoryCharts, CitySelector, Loading, ErrorDisplay } from '@/components';
@@ -76,6 +75,7 @@ export default function HistoryScreen() {
   const { units } = useSettingsStore();
   const { cities } = useCitiesStore();
   const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
+  const { selection } = useHaptics();
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const [period, setPeriod] = useState<HistoryPeriod>('7d');
@@ -106,13 +106,11 @@ export default function HistoryScreen() {
   const dailyQuery = useDailyHistory(cityToQuery || undefined, period, customStartTs, customEndTs);
 
   const handlePeriodChange = useCallback(async (newPeriod: HistoryPeriod) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setPeriod(newPeriod);
     setShowStartPicker(false);
     setShowEndPicker(false);
-  }, []);
+  }, [selection]);
 
   const handleStartDateChange = useCallback((_event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') setShowStartPicker(false);
@@ -130,11 +128,9 @@ export default function HistoryScreen() {
     && customEnd <= yesterday;
 
   const handleChartTypeChange = useCallback(async (type: HistoryChartType) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setChartType(type);
-  }, []);
+  }, [selection]);
 
   const handleAddCity = useCallback(() => {
     router.push('/settings');

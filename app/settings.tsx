@@ -2,21 +2,23 @@
  * Settings screen - Configure app settings and manage saved cities
  */
 
-import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, Alert, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useState, useEffect } from 'react';
-import * as Haptics from 'expo-haptics';
+import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import { useLocation, reverseGeocode, formatLocationQuery } from '@/hooks/useLocation';
 import { Button, Card } from '@/components';
+import { useHaptics } from '@/hooks/useHaptics';
 import type { Units } from '@/types';
 
 export default function SettingsScreen() {
   const { apiUrl, setApiUrl, defaultCity, setDefaultCity, units, setUnits } = useSettingsStore();
   const { cities, addCity, removeCity, selectCity, selectedCityId } = useCitiesStore();
   const { colors, isDark } = useTheme();
+  const { selection, notification } = useHaptics();
   const { requestLocation, loading: locationLoading, hasPermission } = useLocation();
 
   const [localApiUrl, setLocalApiUrl] = useState(apiUrl);
@@ -30,17 +32,13 @@ export default function SettingsScreen() {
   const hasApiChanges = localApiUrl !== apiUrl;
 
   const handleSaveApi = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+    await notification(NotificationFeedbackType.Success);
     setApiUrl(localApiUrl);
     Alert.alert('Saved', 'API settings have been updated');
   };
 
   const handleUnitChange = async (unit: Units) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setUnits(unit);
   };
 
@@ -60,9 +58,7 @@ export default function SettingsScreen() {
       return;
     }
 
-    if (Platform.OS !== 'web') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+    await notification(NotificationFeedbackType.Success);
 
     addCity(cityName);
     setNewCityName('');
@@ -74,9 +70,7 @@ export default function SettingsScreen() {
   };
 
   const handleUseLocation = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
 
     setIsAddingLocation(true);
 
@@ -108,17 +102,13 @@ export default function SettingsScreen() {
             selectCity(existingCity.id);
             setDefaultCity(existingCity.name);
           }
-          if (Platform.OS !== 'web') {
-            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
+          await notification(NotificationFeedbackType.Success);
           Alert.alert('Location Found', `Selected "${cityName}" as your current location.`);
         } else {
           // Add new city with display name "My Location"
           addCity(cityName, 'My Location');
           setDefaultCity(cityName);
-          if (Platform.OS !== 'web') {
-            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
+          await notification(NotificationFeedbackType.Success);
           Alert.alert('Location Added', `Added "${cityName}" as "My Location".`);
         }
       } else {
@@ -126,15 +116,11 @@ export default function SettingsScreen() {
         const coordQuery = formatLocationQuery(latitude, longitude);
         addCity(coordQuery, 'My Location');
         setDefaultCity(coordQuery);
-        if (Platform.OS !== 'web') {
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
+        await notification(NotificationFeedbackType.Success);
         Alert.alert('Location Added', 'Added your current location.');
       }
     } catch (error) {
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
       Alert.alert('Error', 'Failed to get your location. Please try again.');
     }
 
@@ -151,9 +137,7 @@ export default function SettingsScreen() {
           text: 'Remove',
           style: 'destructive',
           onPress: async () => {
-            if (Platform.OS !== 'web') {
-              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            }
+            await notification(NotificationFeedbackType.Warning);
             removeCity(cityId);
           },
         },
@@ -162,9 +146,7 @@ export default function SettingsScreen() {
   };
 
   const handleSelectCity = async (cityId: string, cityName: string) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     selectCity(cityId);
     // Also update default city for legacy compatibility
     setDefaultCity(cityName);

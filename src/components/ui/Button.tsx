@@ -2,9 +2,9 @@
  * Reusable Button component with haptic feedback
  */
 
-import { Pressable, Text, StyleSheet, type ViewStyle, type TextStyle, Platform } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Pressable, Text, StyleSheet, type ViewStyle, type TextStyle } from 'react-native';
 import { useTheme } from '@/theme';
+import { useHaptics } from '@/hooks/useHaptics';
 
 type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
 type ButtonSize = 'small' | 'medium' | 'large';
@@ -33,15 +33,11 @@ export function Button({
   textStyle,
 }: ButtonProps) {
   const { colors, isDark } = useTheme();
+  const { impact } = useHaptics();
 
   const handlePress = async () => {
     if (disabled || loading) return;
-
-    // Haptic feedback on press (iOS and Android)
-    if (Platform.OS !== 'web') {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
+    await impact();
     onPress();
   };
 

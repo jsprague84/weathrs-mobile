@@ -4,10 +4,10 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
-import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme';
+import { useHaptics } from '@/hooks/useHaptics';
 import type { HourlyForecast, DailyForecast, Units } from '@/types';
 
 type ChartType = 'temperature' | 'precipitation' | 'humidity' | 'wind';
@@ -105,14 +105,13 @@ function formatDay(timestamp: number): string {
 
 export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: WeatherChartsProps) {
   const { colors, isDark } = useTheme();
+  const { selection } = useHaptics();
   const [activeChart, setActiveChart] = useState<ChartType>('temperature');
 
   const handleChartChange = useCallback(async (chart: ChartType) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setActiveChart(chart);
-  }, []);
+  }, [selection]);
 
   const hourlySlice = useMemo(() => hourlyData?.slice(0, 24) || [], [hourlyData]);
   const dailySlice = useMemo(() => dailyData?.slice(0, 7) || [], [dailyData]);

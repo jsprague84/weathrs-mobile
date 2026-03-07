@@ -4,8 +4,8 @@
 
 import { useState, memo } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, LayoutAnimation, UIManager } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme';
+import { useHaptics } from '@/hooks/useHaptics';
 import type { DailyForecast, Units } from '@/types';
 
 // Enable LayoutAnimation on Android
@@ -91,6 +91,7 @@ function getMoonPhaseName(phase: number): string {
 
 export const DailyForecastCard = memo(function DailyForecastCard({ forecast, units = 'imperial' }: DailyForecastCardProps) {
   const { colors, isDark } = useTheme();
+  const { selection } = useHaptics();
   const [expanded, setExpanded] = useState(false);
   const tempUnit = getTemperatureUnit(units);
   const speedUnit = getSpeedUnit(units);
@@ -98,9 +99,7 @@ export const DailyForecastCard = memo(function DailyForecastCard({ forecast, uni
   const hasPrecip = forecast.rain_volume || forecast.snow_volume;
 
   const handlePress = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded(!expanded);
   };

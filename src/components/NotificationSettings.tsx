@@ -4,8 +4,8 @@
 
 import { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Switch, Pressable, Platform, ActivityIndicator } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import * as Device from 'expo-device';
+import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useNotifications, scheduleLocalNotification } from '@/hooks/useNotifications';
@@ -14,9 +14,11 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import api from '@/services/api';
 import { Card, Button } from '@/components';
+import { useHaptics } from '@/hooks/useHaptics';
 
 export function NotificationSettings() {
   const { colors, isDark } = useTheme();
+  const { selection, notification } = useHaptics();
   const {
     registerForPushNotifications,
     loading: permissionLoading,
@@ -45,9 +47,7 @@ export function NotificationSettings() {
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const handleRegister = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
 
     setIsRegistering(true);
     setRegistrationError(null);
@@ -82,24 +82,18 @@ export function NotificationSettings() {
 
       setExpoPushToken(token);
 
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      await notification(NotificationFeedbackType.Success);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Registration failed';
       setRegistrationError(errorMsg);
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
     }
 
     setIsRegistering(false);
   };
 
   const handleUnregister = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
 
     if (expoPushToken) {
       try {
@@ -111,15 +105,11 @@ export function NotificationSettings() {
 
     clearRegistration();
 
-    if (Platform.OS !== 'web') {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+    await notification(NotificationFeedbackType.Success);
   };
 
   const handleToggleEnabled = async (value: boolean) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setEnabled(value);
 
     // Update backend if registered
@@ -133,23 +123,17 @@ export function NotificationSettings() {
   };
 
   const handleToggleDailyForecast = useCallback(async (value: boolean) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setDailyForecastEnabled(value);
-  }, [setDailyForecastEnabled]);
+  }, [selection, setDailyForecastEnabled]);
 
   const handleToggleAlerts = useCallback(async (value: boolean) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     setAlertsEnabled(value);
-  }, [setAlertsEnabled]);
+  }, [selection, setAlertsEnabled]);
 
   const handleSendTestNotification = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
 
     setIsSendingTest(true);
     setTestResult(null);
@@ -178,15 +162,11 @@ export function NotificationSettings() {
 
       setTestResult({ success: true, message: 'Local test notification scheduled!' });
 
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      await notification(NotificationFeedbackType.Success);
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to send test notification';
       setTestResult({ success: false, message: errorMsg });
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
     }
 
     setIsSendingTest(false);

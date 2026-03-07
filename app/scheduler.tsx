@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  Platform,
   Pressable,
   Modal,
   TextInput,
@@ -17,14 +16,14 @@ import {
   Alert,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import * as Haptics from 'expo-haptics';
+import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { Card, Button, Loading, NotificationSettings } from '@/components';
-import { useCityToQuery } from '@/hooks/useCityToQuery';
+import { useCityToQuery, useHaptics } from '@/hooks';
 import type { SchedulerJob, CreateJobRequest, UpdateJobRequest, Units } from '@/types';
 
 // Common cron presets (6-field format for tokio-cron-scheduler: sec min hour day month weekday)
@@ -487,6 +486,7 @@ export default function SchedulerScreen() {
   const { units } = useSettingsStore();
   const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
   const { colors, isDark } = useTheme();
+  const { selection, notification } = useHaptics();
   const queryClient = useQueryClient();
 
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -511,15 +511,11 @@ export default function SchedulerScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['scheduler'] });
       setIsFormVisible(false);
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      await notification(NotificationFeedbackType.Success);
     },
     onError: async (error) => {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to create job');
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
     },
   });
 
@@ -550,16 +546,12 @@ export default function SchedulerScreen() {
         queryClient.setQueryData(['scheduler', 'jobs'], context.previousJobs);
       }
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update job');
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
     },
     onSuccess: async () => {
       setIsFormVisible(false);
       setEditingJob(null);
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      await notification(NotificationFeedbackType.Success);
     },
     onSettled: () => {
       // Refetch to ensure cache is in sync
@@ -593,14 +585,10 @@ export default function SchedulerScreen() {
         queryClient.setQueryData(['scheduler', 'jobs'], context.previousJobs);
       }
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to delete job');
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
     },
     onSuccess: async () => {
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      await notification(NotificationFeedbackType.Success);
     },
     onSettled: () => {
       // Refetch to ensure cache is in sync
@@ -611,14 +599,10 @@ export default function SchedulerScreen() {
   const triggerMutation = useMutation({
     mutationFn: (city?: string) => api.triggerForecast(city),
     onSuccess: async () => {
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
+      await notification(NotificationFeedbackType.Success);
     },
     onError: async () => {
-      if (Platform.OS !== 'web') {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      }
+      await notification(NotificationFeedbackType.Error);
     },
   });
 
@@ -630,9 +614,7 @@ export default function SchedulerScreen() {
   };
 
   const handleTrigger = async (city?: string) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     triggerMutation.mutate(city);
   };
 
@@ -662,9 +644,7 @@ export default function SchedulerScreen() {
   };
 
   const handleToggleJob = async (job: SchedulerJob, enabled: boolean) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.selectionAsync();
-    }
+    await selection();
     updateMutation.mutate({ id: job.id, data: { enabled } });
   };
 
