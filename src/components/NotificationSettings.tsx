@@ -2,7 +2,7 @@
  * Notification settings component for managing push notifications
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Switch, Pressable, Platform, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Device from 'expo-device';
@@ -132,19 +132,19 @@ export function NotificationSettings() {
     }
   };
 
-  const handleToggleDailyForecast = async (value: boolean) => {
+  const handleToggleDailyForecast = useCallback(async (value: boolean) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
     }
     setDailyForecastEnabled(value);
-  };
+  }, [setDailyForecastEnabled]);
 
-  const handleToggleAlerts = async (value: boolean) => {
+  const handleToggleAlerts = useCallback(async (value: boolean) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
     }
     setAlertsEnabled(value);
-  };
+  }, [setAlertsEnabled]);
 
   const handleSendTestNotification = async () => {
     if (Platform.OS !== 'web') {

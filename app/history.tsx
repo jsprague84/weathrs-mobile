@@ -2,7 +2,7 @@
  * History screen - Historical weather trends and data
  */
 
-import { useState, type ComponentProps } from 'react';
+import { useState, useCallback, type ComponentProps } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
@@ -106,40 +106,40 @@ export default function HistoryScreen() {
   const trendsQuery = useWeatherTrends(cityToQuery || undefined, period, customStartTs, customEndTs);
   const dailyQuery = useDailyHistory(cityToQuery || undefined, period, customStartTs, customEndTs);
 
-  const handlePeriodChange = async (newPeriod: HistoryPeriod) => {
+  const handlePeriodChange = useCallback(async (newPeriod: HistoryPeriod) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
     }
     setPeriod(newPeriod);
     setShowStartPicker(false);
     setShowEndPicker(false);
-  };
+  }, []);
 
-  const handleStartDateChange = (_event: DateTimePickerEvent, date?: Date) => {
+  const handleStartDateChange = useCallback((_event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') setShowStartPicker(false);
     if (date) setCustomStart(date);
-  };
+  }, []);
 
-  const handleEndDateChange = (_event: DateTimePickerEvent, date?: Date) => {
+  const handleEndDateChange = useCallback((_event: DateTimePickerEvent, date?: Date) => {
     if (Platform.OS === 'android') setShowEndPicker(false);
     if (date) setCustomEnd(date);
-  };
+  }, []);
 
   // Validation for custom range
   const customRangeValid = customStart < customEnd
     && (customEnd.getTime() - customStart.getTime()) / 86400000 <= 365
     && customEnd <= yesterday;
 
-  const handleChartTypeChange = async (type: HistoryChartType) => {
+  const handleChartTypeChange = useCallback(async (type: HistoryChartType) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
     }
     setChartType(type);
-  };
+  }, []);
 
-  const handleAddCity = () => {
+  const handleAddCity = useCallback(() => {
     router.push('/settings');
-  };
+  }, [router]);
 
   const isLoading = trendsQuery.isLoading || dailyQuery.isLoading;
   const error = trendsQuery.error || dailyQuery.error;
