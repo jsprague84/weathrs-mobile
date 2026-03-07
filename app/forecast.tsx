@@ -31,7 +31,7 @@ export default function ForecastScreen() {
   const dailyQuery = useQuery({
     queryKey: ['forecast', 'daily', cityToQuery, units],
     queryFn: () => api.getDailyForecast(cityToQuery, units),
-    enabled: !!cityToQuery,
+    enabled: !!cityToQuery && activeView === 'daily',
     staleTime: 10 * 60 * 1000,
   });
 
