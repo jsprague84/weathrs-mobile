@@ -32,6 +32,19 @@ const TIMEOUT = {
   HEAVY: 30_000,     // History, trends
 } as const;
 
+const MAX_RETRIES = 2;
+const RETRY_BACKOFF_MS = [1000, 2000]; // exponential backoff delays
+
+/** Check if an error/status is retryable */
+function isRetryable(status: number): boolean {
+  return status === 408 || status === 429 || status === 502 || status === 503 || status === 504;
+}
+
+/** Sleep helper */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 class WeathrsApi {
   private baseUrl: string;
   private apiKey: string | null = null;
@@ -66,31 +79,56 @@ class WeathrsApi {
       headers['X-API-Key'] = this.apiKey;
     }
 
-    const controller = new AbortController();
     const timeoutMs = options?.timeout ?? TIMEOUT.STANDARD;
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    let lastError: Error | undefined;
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        signal: controller.signal,
-      });
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          // Check for retryable status codes
+          if (attempt < MAX_RETRIES && isRetryable(response.status)) {
+            // For 429, respect Retry-After header
+            if (response.status === 429) {
+              const retryAfter = response.headers.get('retry-after');
+              const delayMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : RETRY_BACKOFF_MS[attempt];
+              await sleep(delayMs);
+            } else {
+              await sleep(RETRY_BACKOFF_MS[attempt]);
+            }
+            continue;
+          }
+
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
+        }
+
+        return response.json();
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          lastError = new Error(`Request timed out after ${timeoutMs / 1000}s`);
+        } else if (error instanceof TypeError && attempt < MAX_RETRIES) {
+          // Network errors (TypeError from fetch) are retryable
+          lastError = error as Error;
+          await sleep(RETRY_BACKOFF_MS[attempt]);
+          continue;
+        } else {
+          throw error;
+        }
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      return response.json();
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`Request timed out after ${timeoutMs / 1000}s`);
-      }
-      throw error;
-    } finally {
-      clearTimeout(timeoutId);
     }
+
+    throw lastError ?? new Error('Request failed after retries');
   }
 
   // Health check
