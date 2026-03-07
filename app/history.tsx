@@ -80,6 +80,7 @@ export default function HistoryScreen() {
   const router = useRouter();
   const [period, setPeriod] = useState<HistoryPeriod>('7d');
   const [chartType, setChartType] = useState<HistoryChartType>('temperature');
+  const [showAllDays, setShowAllDays] = useState(false);
 
   // Custom date range state
   const thirtyDaysAgo = new Date();
@@ -108,6 +109,7 @@ export default function HistoryScreen() {
   const handlePeriodChange = useCallback(async (newPeriod: HistoryPeriod) => {
     await selection();
     setPeriod(newPeriod);
+    setShowAllDays(false);
     setShowStartPicker(false);
     setShowEndPicker(false);
   }, [selection]);
@@ -407,7 +409,7 @@ export default function HistoryScreen() {
       {days.length > 0 && (
         <View style={styles.breakdownSection}>
           <Text style={[styles.breakdownTitle, { color: colors.text }]}>Daily Breakdown</Text>
-          {days.map((day) => (
+          {(showAllDays ? days : days.slice(0, 30)).map((day) => (
             <View key={day.date} style={[styles.dayCard, { backgroundColor: colors.card }]}>
               <View style={styles.dayHeader}>
                 <Text style={[styles.dayDate, { color: colors.text }]}>
@@ -447,6 +449,16 @@ export default function HistoryScreen() {
               </View>
             </View>
           ))}
+          {!showAllDays && days.length > 30 && (
+            <Pressable
+              style={[styles.showMoreButton, { borderColor: colors.border }]}
+              onPress={() => setShowAllDays(true)}
+            >
+              <Text style={[styles.showMoreText, { color: colors.primary }]}>
+                Show all {days.length} days
+              </Text>
+            </Pressable>
+          )}
         </View>
       )}
 
@@ -637,4 +649,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   hint: { textAlign: 'center', fontSize: 12, marginTop: 24 },
+  showMoreButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+  showMoreText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
