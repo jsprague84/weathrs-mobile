@@ -21,10 +21,10 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { Card, Button, Loading, NotificationSettings } from '@/components';
+import { useCityToQuery } from '@/hooks/useCityToQuery';
 import type { SchedulerJob, CreateJobRequest, UpdateJobRequest, Units } from '@/types';
 
 // Common cron presets (6-field format for tokio-cron-scheduler: sec min hour day month weekday)
@@ -484,16 +484,13 @@ function JobCard({
 }
 
 export default function SchedulerScreen() {
-  const { defaultCity, units } = useSettingsStore();
-  const { getSelectedCity } = useCitiesStore();
+  const { units } = useSettingsStore();
+  const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
   const { colors, isDark } = useTheme();
   const queryClient = useQueryClient();
 
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingJob, setEditingJob] = useState<SchedulerJob | null>(null);
-
-  const selectedCity = getSelectedCity();
-  const cityToQuery = selectedCity?.name || defaultCity;
 
   const statusQuery = useQuery({
     queryKey: ['scheduler', 'status'],
@@ -796,7 +793,7 @@ export default function SchedulerScreen() {
 
             {cityToQuery && (
               <Button
-                title={triggerMutation.isPending ? 'Sending...' : `Send for ${selectedCity?.displayName || cityToQuery}`}
+                title={triggerMutation.isPending ? 'Sending...' : `Send for ${cityDisplayName}`}
                 onPress={() => handleTrigger(cityToQuery)}
                 variant="secondary"
                 disabled={triggerMutation.isPending}

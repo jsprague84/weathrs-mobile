@@ -10,16 +10,15 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { WeatherCharts, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { useCityToQuery } from '@/hooks/useCityToQuery';
 
 export default function ChartsScreen() {
-  const { defaultCity, units } = useSettingsStore();
-  const { getSelectedCity, cities } = useCitiesStore();
+  const { units } = useSettingsStore();
+  const { cities } = useCitiesStore();
   const { colors } = useTheme();
   const router = useRouter();
 
-  // Use selected city from cities store, fallback to default city
-  const selectedCity = getSelectedCity();
-  const cityToQuery = selectedCity?.name || defaultCity;
+  const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
 
   const { data: forecast, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['forecast', 'full', cityToQuery, units],
@@ -77,7 +76,7 @@ export default function ChartsScreen() {
 
       <Text style={[styles.header, { color: colors.text }]}>Weather Charts</Text>
       <Text style={[styles.city, { color: colors.textSecondary }]}>
-        {selectedCity?.displayName || cityToQuery}
+        {cityDisplayName}
       </Text>
 
       {forecast && (

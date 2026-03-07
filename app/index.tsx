@@ -10,16 +10,15 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { WeatherCard, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { useCityToQuery } from '@/hooks/useCityToQuery';
 
 export default function HomeScreen() {
-  const { defaultCity, units, apiUrl } = useSettingsStore();
-  const { getSelectedCity, cities } = useCitiesStore();
+  const { units, apiUrl } = useSettingsStore();
+  const { cities } = useCitiesStore();
   const { colors } = useTheme();
   const router = useRouter();
 
-  // Use selected city from cities store, fallback to default city
-  const selectedCity = getSelectedCity();
-  const cityToQuery = selectedCity?.name || defaultCity;
+  const cityToQuery = useCityToQuery();
 
   const { data: forecast, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['forecast', 'full', cityToQuery, units],

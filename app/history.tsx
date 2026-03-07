@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
+import { useCityToQuery } from '@/hooks/useCityToQuery';
 import { useTheme } from '@/theme';
 import { useDailyHistory, useWeatherTrends } from '@/hooks/useWeather';
 import { HistoryCharts, CitySelector, Loading, ErrorDisplay } from '@/components';
@@ -72,8 +73,9 @@ function formatDate(dateStr: string): string {
 }
 
 export default function HistoryScreen() {
-  const { defaultCity, units } = useSettingsStore();
-  const { getSelectedCity, cities } = useCitiesStore();
+  const { units } = useSettingsStore();
+  const { cities } = useCitiesStore();
+  const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const [period, setPeriod] = useState<HistoryPeriod>('7d');
@@ -99,9 +101,6 @@ export default function HistoryScreen() {
   const customEndTs = period === 'custom'
     ? Math.floor(new Date(customEnd.getFullYear(), customEnd.getMonth(), customEnd.getDate()).getTime() / 1000) + 86400
     : undefined;
-
-  const selectedCity = getSelectedCity();
-  const cityToQuery = selectedCity?.name || defaultCity;
 
   const trendsQuery = useWeatherTrends(cityToQuery || undefined, period, customStartTs, customEndTs);
   const dailyQuery = useDailyHistory(cityToQuery || undefined, period, customStartTs, customEndTs);
@@ -197,7 +196,7 @@ export default function HistoryScreen() {
 
       <Text style={[styles.header, { color: colors.text }]}>Weather History</Text>
       <Text style={[styles.city, { color: colors.textSecondary }]}>
-        {selectedCity?.displayName || cityToQuery}
+        {cityDisplayName}
       </Text>
 
       {/* Period Picker */}

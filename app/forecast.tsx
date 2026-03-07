@@ -13,20 +13,19 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
 import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { useCityToQuery } from '@/hooks/useCityToQuery';
 import type { DailyForecast, HourlyForecast } from '@/types';
 
 type ForecastView = 'daily' | 'hourly';
 
 export default function ForecastScreen() {
-  const { defaultCity, units } = useSettingsStore();
-  const { getSelectedCity, cities } = useCitiesStore();
+  const { units } = useSettingsStore();
+  const { cities } = useCitiesStore();
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const [activeView, setActiveView] = useState<ForecastView>('daily');
 
-  // Use selected city from cities store, fallback to default city
-  const selectedCity = getSelectedCity();
-  const cityToQuery = selectedCity?.name || defaultCity;
+  const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
 
   const dailyQuery = useQuery({
     queryKey: ['forecast', 'daily', cityToQuery, units],
@@ -139,7 +138,7 @@ export default function ForecastScreen() {
             <View style={styles.listHeader}>
               <Text style={[styles.header, { color: colors.text }]}>7-Day Forecast</Text>
               <Text style={[styles.city, { color: colors.textSecondary }]}>
-                {selectedCity?.displayName || cityToQuery}
+                {cityDisplayName}
               </Text>
             </View>
           }
@@ -167,7 +166,7 @@ export default function ForecastScreen() {
             <View style={styles.listHeader}>
               <Text style={[styles.header, { color: colors.text }]}>48-Hour Forecast</Text>
               <Text style={[styles.city, { color: colors.textSecondary }]}>
-                {selectedCity?.displayName || cityToQuery}
+                {cityDisplayName}
               </Text>
             </View>
           }
