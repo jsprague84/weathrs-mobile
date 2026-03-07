@@ -22,6 +22,8 @@ import type {
   DailyHistoryResponse,
   TrendResponse,
   HistoryPeriod,
+  WidgetResponse,
+  AirQualityResponse,
 } from '@/types';
 
 /** Per-endpoint timeout presets (ms) */
@@ -287,6 +289,19 @@ class WeathrsApi {
       body: JSON.stringify({ token, ...settings }),
       useApiKey: true,
     });
+  }
+
+  // Widget
+  async getWidget(city: string, units?: Units): Promise<WidgetResponse> {
+    const params = new URLSearchParams();
+    if (units) params.append('units', units);
+    const query = params.toString();
+    return this.request(`/widget/${encodeURIComponent(city)}${query ? `?${query}` : ''}`, { timeout: TIMEOUT.FAST });
+  }
+
+  // Air Quality
+  async getAirQuality(city: string): Promise<AirQualityResponse> {
+    return this.request(`/air-quality/${encodeURIComponent(city)}`, { timeout: TIMEOUT.FAST });
   }
 
   // Send test notification to device

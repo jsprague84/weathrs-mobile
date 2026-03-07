@@ -14,6 +14,8 @@ export const weatherKeys = {
   forecast: (city?: string) => [...weatherKeys.all, 'forecast', city] as const,
   daily: (city?: string) => [...weatherKeys.all, 'daily', city] as const,
   hourly: (city?: string) => [...weatherKeys.all, 'hourly', city] as const,
+  widget: (city?: string) => [...weatherKeys.all, 'widget', city] as const,
+  airQuality: (city?: string) => [...weatherKeys.all, 'airQuality', city] as const,
   history: (city?: string) => [...weatherKeys.all, 'history', city] as const,
   dailyHistory: (city?: string, period?: string, customStart?: number, customEnd?: number) =>
     [...weatherKeys.all, 'dailyHistory', city, period, customStart, customEnd] as const,
@@ -176,6 +178,34 @@ export function useTriggerForecast() {
       // Invalidate weather queries to refetch fresh data
       queryClient.invalidateQueries({ queryKey: weatherKeys.all });
     },
+  });
+}
+
+// Widget data hook
+export function useWidget(city?: string) {
+  const { defaultCity, units } = useSettingsStore();
+  const queryCity = city || defaultCity;
+
+  return useQuery({
+    queryKey: weatherKeys.widget(queryCity),
+    queryFn: () => api.getWidget(queryCity!, units),
+    enabled: !!queryCity,
+    staleTime: 5 * 60 * 1000, // 5 minutes (matches Cache-Control: max-age=300)
+    gcTime: 30 * 60 * 1000,
+  });
+}
+
+// Air quality hook
+export function useAirQuality(city?: string) {
+  const { defaultCity } = useSettingsStore();
+  const queryCity = city || defaultCity;
+
+  return useQuery({
+    queryKey: weatherKeys.airQuality(queryCity),
+    queryFn: () => api.getAirQuality(queryCity!),
+    enabled: !!queryCity,
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 60 * 60 * 1000,
   });
 }
 

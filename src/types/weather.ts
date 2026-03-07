@@ -274,3 +274,41 @@ export interface TrendResponse {
 }
 
 export type HistoryPeriod = '7d' | '30d' | '90d' | 'custom';
+
+// ============================================================================
+// Widget Types
+// ============================================================================
+
+export interface WidgetResponse {
+  city: string;
+  temperature: number;
+  high: number;
+  low: number;
+  icon: string;
+  description: string;
+  units: string;
+  updated_at: number;
+}
+
+// ============================================================================
+// Air Quality Types
+// ============================================================================
+
+export interface AirQualityComponents {
+  co: number;
+  no: number;
+  no2: number;
+  o3: number;
+  so2: number;
+  pm2_5: number;
+  pm10: number;
+  nh3: number;
+}
+
+export interface AirQualityResponse {
+  city: string;
+  aqi: number;
+  aqi_label: string;
+  components: AirQualityComponents;
+  updated_at: number;
+}

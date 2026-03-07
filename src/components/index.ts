@@ -5,6 +5,7 @@ export { CitySelector } from './CitySelector';
 export { WeatherCharts } from './WeatherCharts';
 export { HistoryCharts } from './HistoryCharts';
 export { NotificationSettings } from './NotificationSettings';
+export { AirQualityCard } from './AirQualityCard';
 
 // UI Components
 export { Button, Card, Loading, ErrorDisplay, ErrorBoundary, Skeleton } from './ui';

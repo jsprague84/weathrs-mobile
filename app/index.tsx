@@ -9,8 +9,9 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCard, CitySelector, Loading, ErrorDisplay, Skeleton } from '@/components';
+import { WeatherCard, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
+import { useAirQuality } from '@/hooks/useWeather';
 
 export default function HomeScreen() {
   const { units, apiUrl } = useSettingsStore();
@@ -19,6 +20,8 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const cityToQuery = useCityToQuery();
+
+  const { data: airQuality } = useAirQuality(cityToQuery || undefined);
 
   const { data: forecast, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['forecast', 'full', cityToQuery, units],
@@ -90,6 +93,10 @@ export default function HomeScreen() {
           location={forecast.location}
           units={units}
         />
+      )}
+
+      {airQuality && (
+        <AirQualityCard data={airQuality} />
       )}
 
       <Text style={[styles.pullHint, { color: colors.textMuted }]}>
