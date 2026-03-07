@@ -118,17 +118,6 @@ export interface WeatherAlert {
 
 export type Units = 'metric' | 'imperial' | 'standard';
 
-export interface SchedulerJob {
-  id: string;
-  name: string;
-  city: string;
-  units: Units;
-  cron: string;
-  enabled: boolean;
-  include_daily: boolean;
-  include_hourly: boolean;
-}
-
 export interface SchedulerStatus {
   running: boolean;
   job_count: number;
