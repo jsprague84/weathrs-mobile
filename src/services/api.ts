@@ -43,7 +43,7 @@ class WeathrsApi {
     this.apiKey = key;
   }
 
-  private async request<T>(endpoint: string, options?: RequestInit & { useApiKey?: boolean }): Promise<T> {
+  private async request<T>(endpoint: string, options?: RequestInit & { useApiKey?: boolean; timeout?: number }): Promise<T> {
     // API v1 routes are prefixed with /api/v1
     const isApiV1 = !endpoint.startsWith('/health') && endpoint !== '/';
     const url = `${this.baseUrl}${isApiV1 ? '/api/v1' : ''}${endpoint}`;
@@ -58,17 +58,31 @@ class WeathrsApi {
       headers['X-API-Key'] = this.apiKey;
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const controller = new AbortController();
+    const timeoutMs = options?.timeout ?? 15000;
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Request timed out after ${timeoutMs / 1000}s`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json();
   }
 
   // Health check
