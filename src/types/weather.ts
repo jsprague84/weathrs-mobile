@@ -53,6 +53,7 @@ export interface FullForecast {
   current: FullCurrentWeather;
   hourly: HourlyForecast[];
   daily: DailyForecast[];
+  alerts: WeatherAlert[];
 }
 
 export interface DailyForecast {
@@ -111,9 +112,10 @@ export interface Forecast {
 export interface WeatherAlert {
   event: string;
   sender: string;
-  start: string;
-  end: string;
+  start: number;
+  end: number;
   description: string;
+  tags?: string[];
 }
 
 export type Units = 'metric' | 'imperial' | 'standard';

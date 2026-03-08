@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCard, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton } from '@/components';
+import { WeatherCard, AlertBanner, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
 import { useAirQuality } from '@/hooks/useWeather';
 
@@ -85,6 +85,11 @@ export default function HomeScreen() {
       {/* City Selector - only show if there are saved cities */}
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
+      )}
+
+      {/* Weather Alerts */}
+      {forecast?.alerts && forecast.alerts.length > 0 && (
+        <AlertBanner alerts={forecast.alerts} />
       )}
 
       {forecast && (

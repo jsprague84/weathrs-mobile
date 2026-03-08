@@ -1,4 +1,5 @@
 export { WeatherCard } from './WeatherCard';
+export { AlertBanner } from './AlertBanner';
 export { DailyForecastCard } from './DailyForecastCard';
 export { HourlyForecastCard } from './HourlyForecastCard';
 export { CitySelector } from './CitySelector';
