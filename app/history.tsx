@@ -400,6 +400,7 @@ export default function HistoryScreen() {
         <View style={[styles.chartCard, { backgroundColor: colors.card, opacity: isPending ? 0.7 : 1 }]}>
           <ErrorBoundary>
             <HistoryCharts
+              key={`${chartType}-${days.length}`}
               data={days}
               chartType={chartType}
               units={units}
