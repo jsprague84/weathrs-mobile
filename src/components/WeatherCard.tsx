@@ -2,7 +2,8 @@
  * Weather card component for displaying current weather with extended details
  */
 
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Share, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import type { FullCurrentWeather, Units } from '@/types';
 
@@ -75,6 +76,19 @@ export function WeatherCard({ weather, location, units = 'imperial' }: WeatherCa
   const speedUnit = getSpeedUnit(units);
   const visUnit = getVisibilityUnit(units);
 
+  const feelsLikeDiff = Math.abs(weather.feels_like - weather.temperature);
+  const showFeelsLikeCallout = feelsLikeDiff >= 5;
+  const isWindChill = weather.feels_like < weather.temperature;
+
+  const handleShare = async () => {
+    const message = `Weather in ${location.city}: ${Math.round(weather.temperature)}${tempUnit} and ${weather.description}\nFeels like ${Math.round(weather.feels_like)}${tempUnit} | Humidity: ${weather.humidity}% | Wind: ${Math.round(weather.wind_speed)} ${speedUnit}\n\nvia Weathrs`;
+    try {
+      await Share.share({ message });
+    } catch {
+      // Share cancelled or failed — no action needed
+    }
+  };
+
   return (
     <View style={[styles.card, {
       backgroundColor: colors.card,
@@ -82,8 +96,13 @@ export function WeatherCard({ weather, location, units = 'imperial' }: WeatherCa
     }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.city, { color: colors.text }]}>{location.city}</Text>
-        <Text style={[styles.country, { color: colors.textSecondary }]}>{location.country}</Text>
+        <View style={styles.headerText}>
+          <Text style={[styles.city, { color: colors.text }]}>{location.city}</Text>
+          <Text style={[styles.country, { color: colors.textSecondary }]}>{location.country}</Text>
+        </View>
+        <TouchableOpacity onPress={handleShare} style={styles.shareButton} hitSlop={8}>
+          <Ionicons name="share-outline" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Main Temperature */}
@@ -96,14 +115,29 @@ export function WeatherCard({ weather, location, units = 'imperial' }: WeatherCa
         </Text>
       </View>
 
-      {/* Primary Details Row */}
-      <View style={styles.details}>
-        <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
-          <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Feels Like</Text>
-          <Text style={[styles.detailValue, { color: colors.text }]}>
-            {Math.round(weather.feels_like)}{tempUnit}
+      {/* Feels Like Callout */}
+      {showFeelsLikeCallout && (
+        <View style={[styles.feelsLikeCallout, {
+          backgroundColor: isWindChill ? 'rgba(33, 150, 243, 0.15)' : 'rgba(255, 152, 0, 0.15)',
+        }]}>
+          <Text style={[styles.feelsLikeCalloutText, {
+            color: isWindChill ? '#2196F3' : '#FF9800',
+          }]}>
+            Feels like {Math.round(weather.feels_like)}{tempUnit} · {isWindChill ? 'Wind chill' : 'Heat index'}
           </Text>
         </View>
+      )}
+
+      {/* Primary Details Row */}
+      <View style={styles.details}>
+        {!showFeelsLikeCallout && (
+          <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
+            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Feels Like</Text>
+            <Text style={[styles.detailValue, { color: colors.text }]}>
+              {Math.round(weather.feels_like)}{tempUnit}
+            </Text>
+          </View>
+        )}
 
         <View style={[styles.detailItem, { backgroundColor: isDark ? colors.surface : colors.background }]}>
           <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Humidity</Text>
@@ -191,8 +225,19 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
+  },
+  headerText: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  shareButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   city: {
     fontSize: 24,
@@ -213,6 +258,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textTransform: 'capitalize',
     marginTop: 8,
+  },
+  feelsLikeCallout: {
+    alignSelf: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  feelsLikeCalloutText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   details: {
     flexDirection: 'row',
