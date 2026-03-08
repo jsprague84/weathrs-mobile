@@ -9,4 +9,4 @@ export { NotificationSettings } from './NotificationSettings';
 export { AirQualityCard } from './AirQualityCard';
 
 // UI Components
-export { Button, Card, Loading, ErrorDisplay, ErrorBoundary, Skeleton } from './ui';
+export { Button, Card, Loading, ErrorDisplay, ErrorBoundary, Skeleton, StaleDataBanner } from './ui';

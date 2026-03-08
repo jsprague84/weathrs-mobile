@@ -12,7 +12,7 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import { useTheme } from '@/theme';
 import { useDailyHistory, useWeatherTrends } from '@/hooks/useWeather';
-import { HistoryCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary } from '@/components';
+import { HistoryCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary, StaleDataBanner } from '@/components';
 import type { HistoryPeriod, DailyHistorySummary } from '@/types';
 
 const PERIODS: { value: HistoryPeriod; label: string }[] = [
@@ -143,6 +143,8 @@ export default function HistoryScreen() {
 
   const isLoading = trendsQuery.isLoading || dailyQuery.isLoading;
   const error = trendsQuery.error || dailyQuery.error;
+  const hasData = !!trendsQuery.data || !!dailyQuery.data;
+  const dataUpdatedAt = Math.max(trendsQuery.dataUpdatedAt, dailyQuery.dataUpdatedAt);
   const isRefetching = trendsQuery.isRefetching || dailyQuery.isRefetching;
   const refetch = () => {
     trendsQuery.refetch();
@@ -165,7 +167,7 @@ export default function HistoryScreen() {
     return <Loading message="Loading history data..." />;
   }
 
-  if (error && period !== 'custom') {
+  if (error && !hasData && period !== 'custom') {
     return (
       <ErrorDisplay
         title="Failed to load history"
@@ -174,6 +176,8 @@ export default function HistoryScreen() {
       />
     );
   }
+
+  const isStale = !!error && hasData;
 
   const summary = trendsQuery.data?.summary;
   const days: DailyHistorySummary[] = dailyQuery.data?.days ?? [];
@@ -193,6 +197,11 @@ export default function HistoryScreen() {
       {/* City Selector */}
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
+      )}
+
+      {/* Stale data banner when showing cached data while offline */}
+      {isStale && dataUpdatedAt > 0 && (
+        <StaleDataBanner dataUpdatedAt={dataUpdatedAt} />
       )}
 
       <Text style={[styles.header, { color: colors.text }]}>Weather History</Text>

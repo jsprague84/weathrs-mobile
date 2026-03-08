@@ -11,7 +11,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay } from '@/components';
+import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay, StaleDataBanner } from '@/components';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import type { DailyForecast, HourlyForecast } from '@/types';
 
@@ -53,10 +53,13 @@ export default function ForecastScreen() {
     router.push('/settings');
   };
 
-  const isLoading = activeView === 'daily' ? dailyQuery.isLoading : hourlyQuery.isLoading;
-  const error = activeView === 'daily' ? dailyQuery.error : hourlyQuery.error;
-  const isRefetching = activeView === 'daily' ? dailyQuery.isRefetching : hourlyQuery.isRefetching;
-  const refetch = activeView === 'daily' ? dailyQuery.refetch : hourlyQuery.refetch;
+  const activeQuery = activeView === 'daily' ? dailyQuery : hourlyQuery;
+  const isLoading = activeQuery.isLoading;
+  const error = activeQuery.error;
+  const isRefetching = activeQuery.isRefetching;
+  const refetch = activeQuery.refetch;
+  const hasData = activeView === 'daily' ? !!dailyQuery.data : !!hourlyQuery.data;
+  const dataUpdatedAt = activeQuery.dataUpdatedAt;
 
   if (!cityToQuery) {
     return (
@@ -74,7 +77,7 @@ export default function ForecastScreen() {
     return <Loading message={`Loading ${activeView} forecast...`} />;
   }
 
-  if (error) {
+  if (error && !hasData) {
     return (
       <ErrorDisplay
         title="Failed to load forecast"
@@ -84,11 +87,18 @@ export default function ForecastScreen() {
     );
   }
 
+  const isStale = !!error && hasData;
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* City Selector - only show if there are saved cities */}
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
+      )}
+
+      {/* Stale data banner when showing cached data while offline */}
+      {isStale && dataUpdatedAt > 0 && (
+        <StaleDataBanner dataUpdatedAt={dataUpdatedAt} />
       )}
 
       {/* Segmented Control */}

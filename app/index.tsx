@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCard, AlertBanner, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton } from '@/components';
+import { WeatherCard, AlertBanner, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton, StaleDataBanner } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
 import { useAirQuality } from '@/hooks/useWeather';
 
@@ -23,7 +23,7 @@ export default function HomeScreen() {
 
   const { data: airQuality } = useAirQuality(cityToQuery || undefined);
 
-  const { data: forecast, isLoading, error, refetch, isRefetching } = useQuery({
+  const { data: forecast, isLoading, error, refetch, isRefetching, dataUpdatedAt } = useQuery({
     queryKey: ['forecast', 'full', cityToQuery, units],
     queryFn: () => api.getFullForecast(cityToQuery, units),
     enabled: !!cityToQuery,
@@ -60,7 +60,7 @@ export default function HomeScreen() {
     );
   }
 
-  if (error) {
+  if (error && !forecast) {
     return (
       <ErrorDisplay
         title="Failed to load weather"
@@ -69,6 +69,8 @@ export default function HomeScreen() {
       />
     );
   }
+
+  const isStale = !!error && !!forecast;
 
   return (
     <ScrollView
@@ -85,6 +87,11 @@ export default function HomeScreen() {
       {/* City Selector - only show if there are saved cities */}
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
+      )}
+
+      {/* Stale data banner when showing cached data while offline */}
+      {isStale && dataUpdatedAt > 0 && (
+        <StaleDataBanner dataUpdatedAt={dataUpdatedAt} />
       )}
 
       {/* Weather Alerts */}
