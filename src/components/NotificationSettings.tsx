@@ -288,38 +288,12 @@ export function NotificationSettings() {
             />
           </View>
 
-          <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
-            <View style={styles.toggleInfo}>
-              <Text style={[styles.toggleLabel, { color: colors.text }]}>Daily Forecast</Text>
-              <Text style={[styles.toggleDescription, { color: colors.textMuted }]}>
-                Morning weather summary
-              </Text>
-            </View>
-            <Switch
-              value={dailyForecastEnabled && enabled}
-              onValueChange={handleToggleDailyForecast}
-              disabled={!enabled}
-              trackColor={{ false: colors.border, true: colors.primary + '80' }}
-              thumbColor={dailyForecastEnabled && enabled ? colors.primary : colors.textMuted}
-              accessibilityLabel="Toggle daily forecast notifications"
-            />
-          </View>
-
           <View style={[styles.toggleRow, { borderBottomColor: 'transparent' }]}>
             <View style={styles.toggleInfo}>
-              <Text style={[styles.toggleLabel, { color: colors.text }]}>Weather Alerts</Text>
               <Text style={[styles.toggleDescription, { color: colors.textMuted }]}>
-                Severe weather warnings
+                Configure notification types (daily forecast, alerts, precipitation) in Scheduler job settings.
               </Text>
             </View>
-            <Switch
-              value={alertsEnabled && enabled}
-              onValueChange={handleToggleAlerts}
-              disabled={!enabled}
-              trackColor={{ false: colors.border, true: colors.primary + '80' }}
-              thumbColor={alertsEnabled && enabled ? colors.primary : colors.textMuted}
-              accessibilityLabel="Toggle weather alert notifications"
-            />
           </View>
 
           {/* Test Notification Button */}
