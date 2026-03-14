@@ -12,7 +12,7 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import { useTheme } from '@/theme';
 import { useDailyHistory, useWeatherTrends } from '@/hooks/useWeather';
-import { HistoryCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary, StaleDataBanner } from '@/components';
+import { HistoryCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary, StaleDataBanner, CurrentDateTime } from '@/components';
 import type { HistoryPeriod, DailyHistorySummary } from '@/types';
 
 const PERIODS: { value: HistoryPeriod; label: string }[] = [
@@ -198,6 +198,8 @@ export default function HistoryScreen() {
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
       )}
+
+      <CurrentDateTime />
 
       {/* Stale data banner when showing cached data while offline */}
       {isStale && dataUpdatedAt > 0 && (

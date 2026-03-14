@@ -11,7 +11,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay, StaleDataBanner } from '@/components';
+import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay, StaleDataBanner, CurrentDateTime } from '@/components';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import type { DailyForecast, HourlyForecast } from '@/types';
 
@@ -95,6 +95,8 @@ export default function ForecastScreen() {
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
       )}
+
+      <CurrentDateTime />
 
       {/* Stale data banner when showing cached data while offline */}
       {isStale && dataUpdatedAt > 0 && (

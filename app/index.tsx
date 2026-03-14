@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCard, AlertBanner, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton, StaleDataBanner } from '@/components';
+import { WeatherCard, AlertBanner, CitySelector, AirQualityCard, Loading, ErrorDisplay, Skeleton, StaleDataBanner, CurrentDateTime } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
 import { useAirQuality } from '@/hooks/useWeather';
 
@@ -88,6 +88,8 @@ export default function HomeScreen() {
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
       )}
+
+      <CurrentDateTime />
 
       {/* Stale data banner when showing cached data while offline */}
       {isStale && dataUpdatedAt > 0 && (
