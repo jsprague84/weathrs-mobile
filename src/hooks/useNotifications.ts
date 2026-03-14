@@ -96,7 +96,12 @@ export function useNotifications(): UseNotificationsReturn {
     // Listen for push token changes (token rotation)
     // Note: addPushTokenListener fires with raw device tokens (FCM/APNs),
     // NOT Expo push tokens. We need to get a fresh Expo token instead.
+    // Guard against re-entrant calls (getExpoPushTokenAsync can re-trigger this listener).
+    let isHandlingTokenChange = false;
     tokenListener.current = Notifications.addPushTokenListener(async () => {
+      if (isHandlingTokenChange) return;
+      isHandlingTokenChange = true;
+
       console.log('[Notifications] Device push token changed, refreshing Expo token');
 
       try {
@@ -104,13 +109,19 @@ export function useNotifications(): UseNotificationsReturn {
         if (!projectId) return;
 
         const { data: newExpoToken } = await Notifications.getExpoPushTokenAsync({ projectId });
+
+        // Only re-register if the token actually changed
+        const currentToken = useNotificationsStore.getState().expoPushToken;
+        if (newExpoToken === currentToken) {
+          console.log('[Notifications] Expo token unchanged, skipping re-registration');
+          return;
+        }
+
         console.log('[Notifications] Got new Expo token:', newExpoToken);
 
-        // Update local state and store
         setState((prev) => ({ ...prev, expoPushToken: newExpoToken }));
         setExpoPushToken(newExpoToken);
 
-        // Re-register with the backend API, preserving cities and settings
         const cityNames = useCitiesStore.getState().cities.map((c) => c.name);
         const { units } = useSettingsStore.getState();
         await api.registerDevice({
@@ -123,6 +134,8 @@ export function useNotifications(): UseNotificationsReturn {
         console.log('[Notifications] Re-registered with new Expo token');
       } catch (err) {
         console.error('[Notifications] Failed to re-register after token change:', err);
+      } finally {
+        isHandlingTokenChange = false;
       }
     });
 
