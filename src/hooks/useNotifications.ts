@@ -13,6 +13,8 @@ import * as Device from 'expo-device';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import api from '@/services/api';
 import { useNotificationsStore } from '@/stores/notificationsStore';
+import { useCitiesStore } from '@/stores/citiesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 /**
  * Check if we're running in Expo Go (as opposed to a development build or standalone app)
@@ -100,10 +102,15 @@ export function useNotifications(): UseNotificationsReturn {
       setState((prev) => ({ ...prev, expoPushToken: newToken }));
       setExpoPushToken(newToken);
 
-      // Re-register with the backend API
+      // Re-register with the backend API, preserving cities and settings
+      const cityNames = useCitiesStore.getState().cities.map((c) => c.name);
+      const { units } = useSettingsStore.getState();
       api.registerDevice({
         token: newToken,
         platform: Platform.OS as 'ios' | 'android',
+        cities: cityNames,
+        units,
+        enabled: true,
       }).then(() => {
         console.log('[Notifications] Re-registered with new token');
       }).catch((err) => {

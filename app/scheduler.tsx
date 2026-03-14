@@ -2,7 +2,7 @@
  * Scheduler screen - View and manage notification schedules
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -141,6 +141,22 @@ function JobFormModal({
   const [showCustomTime, setShowCustomTime] = useState(false);
   const [customHour, setCustomHour] = useState(7);
   const [customMinute, setCustomMinute] = useState(0);
+
+  // Reset form state when modal opens with new data (e.g. editing a different job)
+  useEffect(() => {
+    if (visible) {
+      const data = initialData || defaultFormData;
+      setFormData(data);
+      setShowCronPresets(false);
+      setShowCustomTime(false);
+      // Sync custom time picker with the job's cron schedule
+      const time = cronToTime(data.cron);
+      if (time) {
+        setCustomHour(time.hour);
+        setCustomMinute(time.minute);
+      }
+    }
+  }, [visible, initialData]);
 
   const handleSubmit = () => {
     if (!formData.name.trim()) {
