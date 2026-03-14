@@ -13,8 +13,6 @@ import * as Device from 'expo-device';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import api from '@/services/api';
 import { useNotificationsStore } from '@/stores/notificationsStore';
-import { useCitiesStore } from '@/stores/citiesStore';
-import { useSettingsStore } from '@/stores/settingsStore';
 
 /**
  * Check if we're running in Expo Go (as opposed to a development build or standalone app)
@@ -75,7 +73,6 @@ export function useNotifications(): UseNotificationsReturn {
   const [notification, setNotification] = useState<Notifications.Notification | null>(null);
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
-  const tokenListener = useRef<Notifications.EventSubscription | null>(null);
 
   const { setExpoPushToken } = useNotificationsStore();
 
@@ -93,51 +90,9 @@ export function useNotifications(): UseNotificationsReturn {
       console.log('Notification response:', data);
     });
 
-    // Listen for push token changes (token rotation)
-    // Note: addPushTokenListener fires with raw device tokens (FCM/APNs),
-    // NOT Expo push tokens. We need to get a fresh Expo token instead.
-    // Guard against re-entrant calls (getExpoPushTokenAsync can re-trigger this listener).
-    let isHandlingTokenChange = false;
-    tokenListener.current = Notifications.addPushTokenListener(async () => {
-      if (isHandlingTokenChange) return;
-      isHandlingTokenChange = true;
-
-      console.log('[Notifications] Device push token changed, refreshing Expo token');
-
-      try {
-        const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
-        if (!projectId) return;
-
-        const { data: newExpoToken } = await Notifications.getExpoPushTokenAsync({ projectId });
-
-        // Only re-register if the token actually changed
-        const currentToken = useNotificationsStore.getState().expoPushToken;
-        if (newExpoToken === currentToken) {
-          console.log('[Notifications] Expo token unchanged, skipping re-registration');
-          return;
-        }
-
-        console.log('[Notifications] Got new Expo token:', newExpoToken);
-
-        setState((prev) => ({ ...prev, expoPushToken: newExpoToken }));
-        setExpoPushToken(newExpoToken);
-
-        const cityNames = useCitiesStore.getState().cities.map((c) => c.name);
-        const { units } = useSettingsStore.getState();
-        await api.registerDevice({
-          token: newExpoToken,
-          platform: Platform.OS as 'ios' | 'android',
-          cities: cityNames,
-          units,
-          enabled: true,
-        });
-        console.log('[Notifications] Re-registered with new Expo token');
-      } catch (err) {
-        console.error('[Notifications] Failed to re-register after token change:', err);
-      } finally {
-        isHandlingTokenChange = false;
-      }
-    });
+    // Token rotation is handled at registration time — getExpoPushTokenAsync()
+    // always returns the current valid token. No need for addPushTokenListener
+    // which causes infinite loops (getExpoPushTokenAsync re-triggers it).
 
     // Check current permission status
     checkPermissionStatus();
@@ -148,9 +103,6 @@ export function useNotifications(): UseNotificationsReturn {
       }
       if (responseListener.current) {
         responseListener.current.remove();
-      }
-      if (tokenListener.current) {
-        tokenListener.current.remove();
       }
     };
   }, [setExpoPushToken]);
