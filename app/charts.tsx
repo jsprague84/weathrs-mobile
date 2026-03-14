@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { WeatherCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary } from '@/components';
+import { WeatherCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary, CurrentDateTime } from '@/components';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
 
 export default function ChartsScreen() {
@@ -73,6 +73,8 @@ export default function ChartsScreen() {
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
       )}
+
+      <CurrentDateTime />
 
       <Text style={[styles.header, { color: colors.text }]}>Weather Charts</Text>
       <Text style={[styles.city, { color: colors.textSecondary }]}>
