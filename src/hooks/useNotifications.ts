@@ -100,7 +100,7 @@ export function useNotifications(): UseNotificationsReturn {
       console.log('[Notifications] Device push token changed, refreshing Expo token');
 
       try {
-        const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
         if (!projectId) return;
 
         const { data: newExpoToken } = await Notifications.getExpoPushTokenAsync({ projectId });
@@ -197,11 +197,21 @@ export function useNotifications(): UseNotificationsReturn {
         return null;
       }
 
+      // Configure Android notification channel before requesting token
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('weather', {
+          name: 'Weather Alerts',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#2196F3',
+          sound: 'default',
+        });
+      }
+
       // Get Expo push token
       const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
 
       if (!projectId) {
-        // For development without EAS, use a placeholder
         console.warn('No EAS project ID found, using development mode');
       }
 
@@ -217,17 +227,6 @@ export function useNotifications(): UseNotificationsReturn {
         loading: false,
         error: null,
       }));
-
-      // Configure Android notification channel
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('weather', {
-          name: 'Weather Alerts',
-          importance: Notifications.AndroidImportance.HIGH,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#2196F3',
-          sound: 'default',
-        });
-      }
 
       return token;
     } catch (error) {
