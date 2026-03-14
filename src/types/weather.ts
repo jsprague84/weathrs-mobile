@@ -312,6 +312,10 @@ export interface StatsResponse {
     dailyBudget: number;
     cron: string;
   };
+  database: {
+    sizeBytes: number;
+    sizeHuman: string;
+  };
 }
 
 // ============================================================================

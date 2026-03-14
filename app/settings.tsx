@@ -488,11 +488,11 @@ export default function SettingsScreen() {
               </Text>
             </View>
 
-            {/* Caching Info */}
+            {/* Database & Cache */}
             <View>
-              <Text style={[styles.statsLabel, { color: colors.text }]}>Response Cache</Text>
+              <Text style={[styles.statsLabel, { color: colors.text }]}>Database</Text>
               <Text style={[styles.statsValue, { color: colors.textSecondary }]}>
-                Forecast: 15 min TTL | Weather: 5 min TTL
+                Size: {stats.data.database.sizeHuman} | Cache: 15m forecast, 5m weather
               </Text>
             </View>
 
