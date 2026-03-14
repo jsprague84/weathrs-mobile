@@ -94,28 +94,36 @@ export function useNotifications(): UseNotificationsReturn {
     });
 
     // Listen for push token changes (token rotation)
-    tokenListener.current = Notifications.addPushTokenListener((tokenData) => {
-      const newToken = tokenData.data;
-      console.log('[Notifications] Push token changed:', newToken);
+    // Note: addPushTokenListener fires with raw device tokens (FCM/APNs),
+    // NOT Expo push tokens. We need to get a fresh Expo token instead.
+    tokenListener.current = Notifications.addPushTokenListener(async () => {
+      console.log('[Notifications] Device push token changed, refreshing Expo token');
 
-      // Update local state and store
-      setState((prev) => ({ ...prev, expoPushToken: newToken }));
-      setExpoPushToken(newToken);
+      try {
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+        if (!projectId) return;
 
-      // Re-register with the backend API, preserving cities and settings
-      const cityNames = useCitiesStore.getState().cities.map((c) => c.name);
-      const { units } = useSettingsStore.getState();
-      api.registerDevice({
-        token: newToken,
-        platform: Platform.OS as 'ios' | 'android',
-        cities: cityNames,
-        units,
-        enabled: true,
-      }).then(() => {
-        console.log('[Notifications] Re-registered with new token');
-      }).catch((err) => {
+        const { data: newExpoToken } = await Notifications.getExpoPushTokenAsync({ projectId });
+        console.log('[Notifications] Got new Expo token:', newExpoToken);
+
+        // Update local state and store
+        setState((prev) => ({ ...prev, expoPushToken: newExpoToken }));
+        setExpoPushToken(newExpoToken);
+
+        // Re-register with the backend API, preserving cities and settings
+        const cityNames = useCitiesStore.getState().cities.map((c) => c.name);
+        const { units } = useSettingsStore.getState();
+        await api.registerDevice({
+          token: newExpoToken,
+          platform: Platform.OS as 'ios' | 'android',
+          cities: cityNames,
+          units,
+          enabled: true,
+        });
+        console.log('[Notifications] Re-registered with new Expo token');
+      } catch (err) {
         console.error('[Notifications] Failed to re-register after token change:', err);
-      });
+      }
     });
 
     // Check current permission status
