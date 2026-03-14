@@ -209,6 +209,16 @@ export function useAirQuality(city?: string) {
   });
 }
 
+// System stats hook (auto-refreshes every 60s)
+export function useStats() {
+  return useQuery({
+    queryKey: ['stats'],
+    queryFn: () => api.getStats(),
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+  });
+}
+
 // Refetch all weather data
 export function useRefreshWeather() {
   const queryClient = useQueryClient();

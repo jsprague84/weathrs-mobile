@@ -24,6 +24,7 @@ import type {
   HistoryPeriod,
   WidgetResponse,
   AirQualityResponse,
+  StatsResponse,
 } from '@/types';
 
 /** Per-endpoint timeout presets (ms) */
@@ -226,6 +227,11 @@ class WeathrsApi {
       ? `/scheduler/trigger/${encodeURIComponent(city)}`
       : '/scheduler/trigger';
     return this.request(endpoint, { method: 'POST' });
+  }
+
+  // System Stats
+  async getStats(): Promise<StatsResponse> {
+    return this.request('/stats', { timeout: TIMEOUT.FAST });
   }
 
   // History & Trends

@@ -278,6 +278,43 @@ export interface TrendResponse {
 export type HistoryPeriod = '7d' | '30d' | '90d' | 'custom';
 
 // ============================================================================
+// System Stats Types
+// ============================================================================
+
+export interface StatsResponse {
+  apiBudget: {
+    dailyLimit: number;
+    usedToday: number;
+    remainingToday: number;
+  };
+  history: {
+    totalRecords: number;
+    cities: Array<{
+      city: string;
+      recordCount: number;
+      earliestTimestamp: number;
+      latestTimestamp: number;
+      missingDays: number;
+    }>;
+  };
+  devices: {
+    total: number;
+    enabled: number;
+    byPlatform: Record<string, number>;
+  };
+  scheduler: {
+    totalJobs: number;
+    enabledJobs: number;
+  };
+  backfill: {
+    enabled: boolean;
+    maxYears: number;
+    dailyBudget: number;
+    cron: string;
+  };
+}
+
+// ============================================================================
 // Widget Types
 // ============================================================================
 
