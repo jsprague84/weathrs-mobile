@@ -44,41 +44,78 @@ export const Colors = {
     chartYellow: '#EAB308',
   },
   dark: {
-    // Primary colors
-    primary: '#60A5FA',
-    primaryDark: '#2563EB',
-    primaryLight: '#1E3A5F',
+    // Primary colors — Ayu warm golden accent
+    primary: '#E6B450',
+    primaryDark: '#FF8F40',
+    primaryLight: '#1A1F29',
 
-    // Background colors — blue-tinted slate for modern atmospheric feel
-    background: '#0F172A',
-    surface: '#1E293B',
-    card: '#334155',
+    // Background colors — Ayu Dark
+    background: '#0B0E14',
+    surface: '#0D1017',
+    card: '#131721',
 
-    // Text colors
-    text: '#F8FAFC',
-    textSecondary: '#CBD5E1',
-    textMuted: '#64748B',
+    // Text colors — Ayu Dark
+    text: '#BFBDB6',
+    textSecondary: '#ACB6BF',
+    textMuted: '#565B66',
 
-    // Status colors
-    success: '#4ADE80',
-    error: '#F87171',
-    warning: '#FBBF24',
+    // Status colors — Ayu Dark
+    success: '#7FD962',
+    error: '#D95757',
+    warning: '#E6B450',
 
-    // Border colors
-    border: '#475569',
-    divider: '#334155',
+    // Border colors — Ayu Dark
+    border: '#1C2433',
+    divider: '#151A25',
 
     // Tab bar
-    tabBar: '#1E293B',
-    tabBarInactive: '#64748B',
+    tabBar: '#0B0E14',
+    tabBarInactive: '#565B66',
 
-    // Data visualization
-    chartRed: '#F87171',
-    chartBlue: '#60A5FA',
-    chartGreen: '#4ADE80',
-    chartPurple: '#A78BFA',
-    chartOrange: '#FBBF24',
-    chartYellow: '#FDE047',
+    // Data visualization — Ayu Dark accents
+    chartRed: '#D95757',
+    chartBlue: '#59C2FF',
+    chartGreen: '#7FD962',
+    chartPurple: '#D2A6FF',
+    chartOrange: '#FF8F40',
+    chartYellow: '#E6B450',
+  },
+  midnight: {
+    // Primary colors — Moonlight blue
+    primary: '#82AAFF',
+    primaryDark: '#65A0F7',
+    primaryLight: '#2F334D',
+
+    // Background colors — Moonlight II
+    background: '#222436',
+    surface: '#1E2030',
+    card: '#2F334D',
+
+    // Text colors — Moonlight
+    text: '#C8D3F5',
+    textSecondary: '#B4C2F0',
+    textMuted: '#636DA6',
+
+    // Status colors — Moonlight
+    success: '#C3E88D',
+    error: '#FF757F',
+    warning: '#FFC777',
+
+    // Border colors
+    border: '#383E5C',
+    divider: '#2F334D',
+
+    // Tab bar
+    tabBar: '#1E2030',
+    tabBarInactive: '#636DA6',
+
+    // Data visualization — Moonlight accents
+    chartRed: '#FF757F',
+    chartBlue: '#82AAFF',
+    chartGreen: '#C3E88D',
+    chartPurple: '#C099FF',
+    chartOrange: '#FFC777',
+    chartYellow: '#FFC777',
   },
 } as const;
 

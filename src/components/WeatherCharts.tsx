@@ -251,7 +251,12 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
 
       {/* Charts */}
       <View
-        style={[styles.chartCard, { backgroundColor: colors.card, opacity: isPending ? 0.7 : 1 }]}
+        style={[styles.chartCard, {
+          backgroundColor: colors.card,
+          opacity: isPending ? 0.7 : 1,
+          borderWidth: isDark ? 1 : 0,
+          borderColor: colors.border,
+        }]}
         accessibilityLabel={`${activeChart} chart showing 24-hour and 7-day data`}
         accessibilityRole="summary"
       >

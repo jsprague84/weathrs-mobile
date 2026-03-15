@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Units } from '@/types';
 import api from '@/services/api';
 
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type ThemeMode = 'system' | 'light' | 'dark' | 'midnight';
 
 interface SettingsState {
   // API Configuration

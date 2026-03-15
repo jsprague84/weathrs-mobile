@@ -76,7 +76,9 @@ export const HourlyForecastCard = memo(function HourlyForecastCard({ forecast, u
   return (
     <View style={[styles.card, {
       backgroundColor: colors.card,
-      shadowOpacity: isDark ? 0.2 : 0.05,
+      shadowOpacity: isDark ? 0 : 0.05,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: colors.border,
     }]}>
       <View style={styles.timeContainer}>
         <Text style={[styles.time, { color: colors.text }]}>

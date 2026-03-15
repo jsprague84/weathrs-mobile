@@ -109,7 +109,9 @@ export const DailyForecastCard = memo(function DailyForecastCard({ forecast, uni
       onPress={handlePress}
       style={[styles.card, {
         backgroundColor: colors.card,
-        shadowOpacity: isDark ? 0.2 : 0.05,
+        shadowOpacity: isDark ? 0 : 0.05,
+        borderWidth: isDark ? 1 : 0,
+        borderColor: colors.border,
       }]}
       accessibilityRole="button"
       accessibilityLabel="Expand forecast details"

@@ -304,7 +304,11 @@ export default function HistoryScreen() {
 
       {/* Trend Summary Card */}
       {summary && (
-        <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
+        <View style={[styles.summaryCard, {
+          backgroundColor: colors.card,
+          borderWidth: isDark ? 1 : 0,
+          borderColor: colors.border,
+        }]}>
           <Text style={[styles.summaryTitle, { color: colors.text }]}>Trend Summary</Text>
 
           <View style={styles.summaryGrid}>
@@ -408,7 +412,12 @@ export default function HistoryScreen() {
 
       {/* History Chart */}
       {days.length > 0 && (
-        <View style={[styles.chartCard, { backgroundColor: colors.card, opacity: isPending ? 0.7 : 1 }]}>
+        <View style={[styles.chartCard, {
+            backgroundColor: colors.card,
+            opacity: isPending ? 0.7 : 1,
+            borderWidth: isDark ? 1 : 0,
+            borderColor: colors.border,
+          }]}>
           <ErrorBoundary>
             <HistoryCharts
               key={`${chartType}-${days.length}`}
@@ -425,7 +434,11 @@ export default function HistoryScreen() {
         <View style={styles.breakdownSection}>
           <Text style={[styles.breakdownTitle, { color: colors.text }]}>Daily Breakdown</Text>
           {(showAllDays ? days : days.slice(0, 30)).map((day) => (
-            <View key={day.date} style={[styles.dayCard, { backgroundColor: colors.card }]}>
+            <View key={day.date} style={[styles.dayCard, {
+              backgroundColor: colors.card,
+              borderWidth: isDark ? 1 : 0,
+              borderColor: colors.border,
+            }]}>
               <View style={styles.dayHeader}>
                 <Text style={[styles.dayDate, { color: colors.text }]}>
                   {formatDate(day.date)}

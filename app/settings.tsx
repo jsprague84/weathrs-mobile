@@ -2,7 +2,7 @@
  * Settings screen - Configure app settings and manage saved cities
  */
 
-import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, Alert, ActivityIndicator, Switch } from 'react-native';
 import { useState, useEffect } from 'react';
 import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
@@ -353,38 +353,67 @@ export default function SettingsScreen() {
       </Card>
 
       <Card>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Appearance</Text>
+        <View style={styles.appearanceHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 0 }]}>Appearance</Text>
+          <Pressable
+            style={styles.autoToggle}
+            onPress={async () => {
+              await selection();
+              setThemeMode(themeMode === 'system' ? 'dark' : 'system');
+            }}
+          >
+            <Text style={[styles.autoLabel, { color: themeMode === 'system' ? colors.primary : colors.textMuted }]}>Auto</Text>
+            <Switch
+              value={themeMode === 'system'}
+              onValueChange={async (val) => {
+                await selection();
+                setThemeMode(val ? 'system' : 'dark');
+              }}
+              trackColor={{ false: colors.border, true: colors.primary + '66' }}
+              thumbColor={themeMode === 'system' ? colors.primary : colors.textMuted}
+              style={{ transform: [{ scale: 0.8 }] }}
+            />
+          </Pressable>
+        </View>
         <View style={styles.unitsContainer}>
-          {(['system', 'light', 'dark'] as ThemeMode[]).map((mode) => (
-            <Pressable
-              key={mode}
-              style={[
-                styles.unitButton,
-                {
-                  backgroundColor: isDark ? colors.surface : colors.background,
-                  borderColor: themeMode === mode ? colors.primary : 'transparent',
-                },
-                themeMode === mode && { backgroundColor: colors.primaryLight },
-              ]}
-              onPress={() => handleThemeChange(mode)}
-            >
-              <Ionicons
-                name={mode === 'system' ? 'phone-portrait-outline' : mode === 'light' ? 'sunny-outline' : 'moon-outline'}
-                size={18}
-                color={themeMode === mode ? colors.primary : colors.textSecondary}
-                style={{ marginBottom: 4 }}
-              />
-              <Text
+          {(['light', 'midnight', 'dark'] as ThemeMode[]).map((mode) => {
+            const label = mode === 'light' ? 'Light' : mode === 'dark' ? 'Dark' : 'Dusk';
+            const icon = mode === 'light' ? 'sunny-outline' as const
+              : mode === 'dark' ? 'moon-outline' as const
+              : 'sparkles-outline' as const;
+            const isSelected = themeMode === mode || (themeMode === 'system' && mode === 'light') || (themeMode === 'system' && mode === 'dark');
+            const isActive = themeMode === mode;
+            return (
+              <Pressable
+                key={mode}
                 style={[
-                  styles.unitButtonText,
-                  { color: themeMode === mode ? colors.primary : colors.textSecondary },
-                  themeMode === mode && styles.unitButtonTextActive,
+                  styles.unitButton,
+                  {
+                    backgroundColor: isDark ? colors.surface : colors.background,
+                    borderColor: isActive ? colors.primary : 'transparent',
+                  },
+                  isActive && { backgroundColor: colors.primaryLight },
                 ]}
+                onPress={() => handleThemeChange(mode)}
               >
-                {mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark'}
-              </Text>
-            </Pressable>
-          ))}
+                <Ionicons
+                  name={icon}
+                  size={18}
+                  color={isActive ? colors.primary : colors.textSecondary}
+                  style={{ marginBottom: 4 }}
+                />
+                <Text
+                  style={[
+                    styles.unitButtonText,
+                    { color: isActive ? colors.primary : colors.textSecondary },
+                    isActive && styles.unitButtonTextActive,
+                  ]}
+                >
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </Card>
 
@@ -620,6 +649,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
   },
+  appearanceHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  autoToggle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  autoLabel: { fontSize: 13, fontWeight: '500' },
   unitsContainer: { flexDirection: 'row', gap: 8 },
   unitButton: {
     flex: 1,

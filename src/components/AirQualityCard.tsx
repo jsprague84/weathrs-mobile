@@ -42,7 +42,9 @@ export function AirQualityCard({ data }: AirQualityCardProps) {
   return (
     <View style={[styles.card, {
       backgroundColor: colors.card,
-      shadowOpacity: isDark ? 0.3 : 0.1,
+      shadowOpacity: isDark ? 0 : 0.1,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: colors.border,
     }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Air Quality</Text>

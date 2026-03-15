@@ -23,18 +23,23 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const systemColorScheme = useColorScheme();
   const themeMode = useThemeMode();
 
-  const colorScheme = themeMode === 'system'
+  const resolvedScheme = themeMode === 'system'
     ? (systemColorScheme ?? 'light')
-    : themeMode;
-  const isDark = colorScheme === 'dark';
+    : themeMode === 'midnight'
+      ? 'midnight'
+      : themeMode;
+  // For the theme context, both 'dark' and 'midnight' are dark modes
+  const colorScheme = resolvedScheme === 'midnight' ? 'dark' : resolvedScheme;
+  const isDark = resolvedScheme === 'dark' || resolvedScheme === 'midnight';
+  const paletteKey = resolvedScheme as keyof typeof Colors;
 
   const value = useMemo(
     () => ({
-      colors: Colors[colorScheme],
+      colors: Colors[paletteKey],
       isDark,
-      colorScheme,
+      colorScheme: colorScheme as 'light' | 'dark',
     }),
-    [colorScheme, isDark]
+    [paletteKey, isDark, colorScheme]
   );
 
   return (
