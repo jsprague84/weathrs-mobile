@@ -32,7 +32,7 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
-      "versionCode": 5
+      "versionCode": 12
     },
     "web": {
       "favicon": "./assets/favicon.png",
