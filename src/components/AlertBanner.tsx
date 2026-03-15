@@ -44,6 +44,8 @@ function AlertItem({ alert, colors }: { alert: WeatherAlert; colors: { error: st
       activeOpacity={0.8}
       onPress={() => setExpanded(!expanded)}
       style={[styles.alertItem, { backgroundColor: severity.bg }]}
+      accessibilityRole="button"
+      accessibilityHint="Double tap to expand details"
     >
       <View style={styles.alertHeader}>
         <View style={styles.alertInfo}>
@@ -86,7 +88,7 @@ export function AlertBanner({ alerts }: AlertBannerProps) {
             {alerts.length} active alerts
           </Text>
         )}
-        <TouchableOpacity onPress={() => setDismissed(true)} hitSlop={8} style={styles.dismissButton}>
+        <TouchableOpacity onPress={() => setDismissed(true)} hitSlop={8} style={styles.dismissButton} accessibilityLabel="Dismiss alerts" accessibilityRole="button">
           <Ionicons name="close" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>

@@ -38,7 +38,7 @@ export default function HomeScreen() {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.centered}>
-          <Text style={[styles.title, { color: colors.text }]}>Welcome to Weathrs</Text>
+          <Text style={[styles.title, { color: colors.text }]} accessibilityRole="header">Welcome to Weathrs</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Go to Settings to add cities and configure your API server.
           </Text>

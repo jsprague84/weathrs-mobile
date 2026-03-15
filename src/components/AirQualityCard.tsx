@@ -45,7 +45,7 @@ export function AirQualityCard({ data }: AirQualityCardProps) {
       shadowOpacity: isDark ? 0 : 0.1,
       borderWidth: isDark ? 1 : 0,
       borderColor: colors.border,
-    }]}>
+    }]} accessibilityLabel="Air quality information" accessibilityRole="summary">
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Air Quality</Text>
         <View style={[styles.aqiBadge, { backgroundColor: aqiColor }]}>

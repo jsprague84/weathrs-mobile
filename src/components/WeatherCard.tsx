@@ -95,14 +95,14 @@ export function WeatherCard({ weather, location, units = 'imperial' }: WeatherCa
       shadowOpacity: isDark ? 0 : 0.1,
       borderWidth: isDark ? 1 : 0,
       borderColor: colors.border,
-    }]}>
+    }]} accessibilityLabel="Current weather details" accessibilityRole="summary">
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={[styles.city, { color: colors.text }]}>{location.city}</Text>
           <Text style={[styles.country, { color: colors.textSecondary }]}>{location.country}</Text>
         </View>
-        <TouchableOpacity onPress={handleShare} style={styles.shareButton} hitSlop={8}>
+        <TouchableOpacity onPress={handleShare} style={styles.shareButton} hitSlop={8} accessibilityLabel="Share weather" accessibilityRole="button">
           <Ionicons name="share-outline" size={24} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
@@ -121,7 +121,7 @@ export function WeatherCard({ weather, location, units = 'imperial' }: WeatherCa
       {showFeelsLikeCallout && (
         <View style={[styles.feelsLikeCallout, {
           backgroundColor: (isWindChill ? colors.chartBlue : colors.chartOrange) + '26',
-        }]}>
+        }]} accessibilityLabel={`Feels like ${Math.round(weather.feels_like)}${tempUnit} · ${isWindChill ? 'Wind chill' : 'Heat index'}`}>
           <Text style={[styles.feelsLikeCalloutText, {
             color: isWindChill ? colors.chartBlue : colors.chartOrange,
           }]}>

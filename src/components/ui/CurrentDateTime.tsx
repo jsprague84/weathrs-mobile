@@ -34,7 +34,7 @@ export function CurrentDateTime() {
   }, []);
 
   return (
-    <Text style={[styles.dateTime, { color: colors.textSecondary }]}>
+    <Text style={[styles.dateTime, { color: colors.textSecondary }]} accessibilityRole="text" accessibilityLabel={dateTime}>
       {dateTime}
     </Text>
   );

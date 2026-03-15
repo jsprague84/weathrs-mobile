@@ -42,13 +42,13 @@ export function ErrorDisplay({
 
   if (fullScreen) {
     return (
-      <View style={[styles.fullScreen, { backgroundColor: colors.background }]}>
+      <View style={[styles.fullScreen, { backgroundColor: colors.background }]} accessibilityRole="alert" accessibilityLabel={title + (message ? '. ' + message : '')}>
         {content}
       </View>
     );
   }
 
-  return <View style={styles.inline}>{content}</View>;
+  return <View style={styles.inline} accessibilityRole="alert" accessibilityLabel={title + (message ? '. ' + message : '')}>{content}</View>;
 }
 
 const styles = StyleSheet.create({

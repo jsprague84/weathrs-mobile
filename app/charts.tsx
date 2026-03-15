@@ -76,7 +76,7 @@ export default function ChartsScreen() {
 
       <CurrentDateTime />
 
-      <Text style={[styles.header, { color: colors.text }]}>Weather Charts</Text>
+      <Text style={[styles.header, { color: colors.text }]} accessibilityRole="header">Weather Charts</Text>
       <Text style={[styles.city, { color: colors.textSecondary }]}>
         {cityDisplayName}
       </Text>

@@ -206,7 +206,7 @@ export default function HistoryScreen() {
         <StaleDataBanner dataUpdatedAt={dataUpdatedAt} />
       )}
 
-      <Text style={[styles.header, { color: colors.text }]}>Weather History</Text>
+      <Text style={[styles.header, { color: colors.text }]} accessibilityRole="header">Weather History</Text>
       <Text style={[styles.city, { color: colors.textSecondary }]}>
         {cityDisplayName}
       </Text>
@@ -432,7 +432,7 @@ export default function HistoryScreen() {
       {/* Daily Breakdown */}
       {days.length > 0 && (
         <View style={styles.breakdownSection}>
-          <Text style={[styles.breakdownTitle, { color: colors.text }]}>Daily Breakdown</Text>
+          <Text style={[styles.breakdownTitle, { color: colors.text }]} accessibilityRole="header">Daily Breakdown</Text>
           {(showAllDays ? days : days.slice(0, 30)).map((day) => (
             <View key={day.date} style={[styles.dayCard, {
               backgroundColor: colors.card,

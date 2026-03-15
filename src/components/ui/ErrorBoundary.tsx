@@ -57,11 +57,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
+    color: '#EF4444',
   },
   message: {
     fontSize: 14,
-    color: '#999',
+    color: '#737373',
     textAlign: 'center',
   },
 });

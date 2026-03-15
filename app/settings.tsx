@@ -337,6 +337,8 @@ export default function SettingsScreen() {
                 units === unit && { backgroundColor: colors.primaryLight },
               ]}
               onPress={() => handleUnitChange(unit)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: units === unit }}
             >
               <Text
                 style={[
@@ -372,6 +374,7 @@ export default function SettingsScreen() {
               trackColor={{ false: colors.border, true: colors.primary + '66' }}
               thumbColor={themeMode === 'system' ? colors.primary : colors.textMuted}
               style={{ transform: [{ scale: 0.8 }] }}
+              accessibilityLabel="Auto theme based on system setting"
             />
           </Pressable>
         </View>
@@ -395,6 +398,8 @@ export default function SettingsScreen() {
                   isActive && { backgroundColor: colors.primaryLight },
                 ]}
                 onPress={() => handleThemeChange(mode)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: isActive }}
               >
                 <Ionicons
                   name={icon}

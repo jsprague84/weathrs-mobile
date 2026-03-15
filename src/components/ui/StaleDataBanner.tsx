@@ -34,7 +34,7 @@ export function StaleDataBanner({ dataUpdatedAt }: StaleDataBannerProps) {
   return (
     <View style={[styles.banner, {
       backgroundColor: isVeryStale ? colors.chartYellow + '26' : colors.textMuted + '1F',
-    }]}>
+    }]} accessibilityRole="alert" accessibilityLabel={getRelativeTime(dataUpdatedAt)}>
       <Ionicons
         name="cloud-offline-outline"
         size={16}

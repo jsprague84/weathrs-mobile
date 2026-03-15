@@ -27,13 +27,13 @@ export function Loading({ message, size = 'large', fullScreen = true }: LoadingP
 
   if (fullScreen) {
     return (
-      <View style={[styles.fullScreen, { backgroundColor: colors.background }]}>
+      <View style={[styles.fullScreen, { backgroundColor: colors.background }]} accessibilityRole="alert" accessibilityLabel={message || 'Loading'}>
         {content}
       </View>
     );
   }
 
-  return <View style={styles.inline}>{content}</View>;
+  return <View style={styles.inline} accessibilityRole="alert" accessibilityLabel={message || 'Loading'}>{content}</View>;
 }
 
 const styles = StyleSheet.create({
