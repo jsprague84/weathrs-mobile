@@ -127,7 +127,7 @@ export default function HistoryScreen() {
 
   // Validation for custom range
   const customRangeValid = customStart < customEnd
-    && (customEnd.getTime() - customStart.getTime()) / 86400000 <= 365
+    && (customEnd.getTime() - customStart.getTime()) / 86400000 <= 800
     && customEnd <= yesterday;
 
   const handleChartTypeChange = useCallback(async (type: HistoryChartType) => {
@@ -281,7 +281,7 @@ export default function HistoryScreen() {
 
           {!customRangeValid && (
             <Text style={styles.dateError}>
-              Invalid range. Max 365 days, end must be before today.
+              Invalid range. Max 800 days, end must be before today.
             </Text>
           )}
         </View>
