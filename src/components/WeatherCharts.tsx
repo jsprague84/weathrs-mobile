@@ -134,8 +134,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
   const hourlyPrecipData = useMemo(() => hourlySlice.map((h, i) => ({
     value: Math.round(h.precipitation_probability * 100),
     label: i % 4 === 0 ? formatHour(h.timestamp) : '',
-    frontColor: 'rgba(33, 150, 243, 0.7)',
-  })), [hourlySlice]);
+    frontColor: colors.chartBlue + 'B3',
+  })), [hourlySlice, colors.chartBlue]);
 
   const hourlyHumidityData = useMemo(() => hourlySlice.map((h, i) => ({
     value: h.humidity,
@@ -161,8 +161,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
   const dailyPrecipData = useMemo(() => dailySlice.map((d) => ({
     value: Math.round(d.precipitation_probability * 100),
     label: formatDay(d.timestamp),
-    frontColor: 'rgba(33, 150, 243, 0.7)',
-  })), [dailySlice]);
+    frontColor: colors.chartBlue + 'B3',
+  })), [dailySlice, colors.chartBlue]);
 
   const dailyHumidityData = useMemo(() => dailySlice.map((d) => ({
     value: d.humidity,
@@ -224,7 +224,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               styles.tabButton,
               {
                 backgroundColor: activeChart === type
-                  ? (isDark ? colors.primaryLight : '#E3F2FD')
+                  ? colors.primaryLight
                   : (isDark ? colors.surface : colors.background),
                 borderColor: activeChart === type ? colors.primary : colors.border,
               },
@@ -267,9 +267,9 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 {...lineChartCommon}
                 {...tempYAxisProps}
                 color={colors.primary}
-                color2="#FF9800"
+                color2={colors.chartOrange}
                 dataPointsColor={colors.primary}
-                dataPointsColor2="#FF9800"
+                dataPointsColor2={colors.chartOrange}
                 height={180}
               />
             </ScrollView>
@@ -281,7 +281,7 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 </Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#FF9800' }]} />
+                <View style={[styles.legendDot, { backgroundColor: colors.chartOrange }]} />
                 <Text style={[styles.legendText, { color: colors.textSecondary }]}>
                   Feels Like
                 </Text>
@@ -298,22 +298,22 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 {...lineChartCommon}
                 {...dailyTempYAxisProps}
                 spacing={40}
-                color="#F44336"
-                color2="#2196F3"
-                dataPointsColor="#F44336"
-                dataPointsColor2="#2196F3"
+                color={colors.chartRed}
+                color2={colors.chartBlue}
+                dataPointsColor={colors.chartRed}
+                dataPointsColor2={colors.chartBlue}
                 height={180}
               />
             </ScrollView>
             <View style={styles.legendRow}>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#F44336' }]} />
+                <View style={[styles.legendDot, { backgroundColor: colors.chartRed }]} />
                 <Text style={[styles.legendText, { color: colors.textSecondary }]}>
                   High ({getTemperatureUnit(units)})
                 </Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: '#2196F3' }]} />
+                <View style={[styles.legendDot, { backgroundColor: colors.chartBlue }]} />
                 <Text style={[styles.legendText, { color: colors.textSecondary }]}>
                   Low ({getTemperatureUnit(units)})
                 </Text>
@@ -381,8 +381,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
               <LineChart
                 data={hourlyHumidityData}
                 {...lineChartCommon}
-                color="#4CAF50"
-                dataPointsColor="#4CAF50"
+                color={colors.chartGreen}
+                dataPointsColor={colors.chartGreen}
                 height={180}
                 maxValue={100}
                 noOfSections={5}
@@ -399,8 +399,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={dailyHumidityData}
                 {...lineChartCommon}
                 spacing={40}
-                color="#4CAF50"
-                dataPointsColor="#4CAF50"
+                color={colors.chartGreen}
+                dataPointsColor={colors.chartGreen}
                 height={180}
                 maxValue={100}
                 noOfSections={5}
@@ -421,8 +421,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 data={hourlyWindData}
                 {...lineChartCommon}
                 {...windYAxisProps}
-                color="#9C27B0"
-                dataPointsColor="#9C27B0"
+                color={colors.chartPurple}
+                dataPointsColor={colors.chartPurple}
                 height={180}
               />
             </ScrollView>
@@ -436,8 +436,8 @@ export function WeatherCharts({ hourlyData, dailyData, units = 'imperial' }: Wea
                 {...lineChartCommon}
                 {...dailyWindYAxisProps}
                 spacing={40}
-                color="#9C27B0"
-                dataPointsColor="#9C27B0"
+                color={colors.chartPurple}
+                dataPointsColor={colors.chartPurple}
                 height={180}
               />
             </ScrollView>

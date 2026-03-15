@@ -46,10 +46,10 @@ export function Button({
 
     const variantColors: Record<ButtonVariant, { normal: string; pressed: string }> = {
       primary: { normal: colors.primary, pressed: colors.primaryDark },
-      secondary: { normal: isDark ? colors.surface : '#E3F2FD', pressed: colors.primaryLight },
-      success: { normal: colors.success, pressed: '#388E3C' },
-      danger: { normal: colors.error, pressed: '#D32F2F' },
-      ghost: { normal: 'transparent', pressed: isDark ? colors.surface : '#F5F5F5' },
+      secondary: { normal: isDark ? colors.surface : colors.primaryLight, pressed: colors.primaryDark + '33' },
+      success: { normal: colors.success, pressed: colors.chartGreen },
+      danger: { normal: colors.error, pressed: colors.chartRed },
+      ghost: { normal: 'transparent', pressed: isDark ? colors.surface : colors.background },
     };
 
     return pressed ? variantColors[variant].pressed : variantColors[variant].normal;

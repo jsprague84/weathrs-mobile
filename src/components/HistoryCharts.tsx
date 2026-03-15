@@ -106,8 +106,8 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
   const precipData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.precipitation_total * 10) / 10,
     label: makeLabels(d, i),
-    frontColor: 'rgba(33, 150, 243, 0.7)',
-  })), [data, labelInterval]);
+    frontColor: colors.chartBlue + 'B3',
+  })), [data, labelInterval, colors.chartBlue]);
 
   const humidityData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.humidity_avg),
@@ -126,11 +126,11 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
   const tempDataSet = useMemo(() => [
     {
       data: highData,
-      color: '#F44336',
-      dataPointsColor: '#F44336',
+      color: colors.chartRed,
+      dataPointsColor: colors.chartRed,
       areaChart: true,
-      startFillColor: 'rgba(244, 67, 54, 0.15)',
-      endFillColor: 'rgba(244, 67, 54, 0.01)',
+      startFillColor: colors.chartRed + '26',
+      endFillColor: colors.chartRed + '03',
       startOpacity: 0.3,
       endOpacity: 0.05,
     },
@@ -141,15 +141,15 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
     },
     {
       data: lowData,
-      color: '#2196F3',
-      dataPointsColor: '#2196F3',
+      color: colors.chartBlue,
+      dataPointsColor: colors.chartBlue,
       areaChart: true,
-      startFillColor: 'rgba(33, 150, 243, 0.15)',
-      endFillColor: 'rgba(33, 150, 243, 0.01)',
+      startFillColor: colors.chartBlue + '26',
+      endFillColor: colors.chartBlue + '03',
       startOpacity: 0.3,
       endOpacity: 0.05,
     },
-  ], [highData, lowData, avgData, colors.primary]);
+  ], [highData, lowData, avgData, colors.primary, colors.chartRed, colors.chartBlue]);
 
   if (data.length === 0) {
     return (
@@ -195,7 +195,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
         />
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#F44336' }]} />
+            <View style={[styles.legendDot, { backgroundColor: colors.chartRed }]} />
             <Text style={[styles.legendText, { color: colors.textSecondary }]}>High</Text>
           </View>
           <View style={styles.legendItem}>
@@ -203,7 +203,7 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
             <Text style={[styles.legendText, { color: colors.textSecondary }]}>Avg</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#2196F3' }]} />
+            <View style={[styles.legendDot, { backgroundColor: colors.chartBlue }]} />
             <Text style={[styles.legendText, { color: colors.textSecondary }]}>Low</Text>
           </View>
         </View>
@@ -244,15 +244,15 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
         <LineChart
           data={humidityData}
           {...commonLineProps}
-          color="#4CAF50"
-          dataPointsColor="#4CAF50"
+          color={colors.chartGreen}
+          dataPointsColor={colors.chartGreen}
           maxValue={100}
           noOfSections={5}
           stepValue={20}
           yAxisLabelSuffix="%"
           areaChart
-          startFillColor="rgba(76, 175, 80, 0.2)"
-          endFillColor="rgba(76, 175, 80, 0.02)"
+          startFillColor={colors.chartGreen + '33'}
+          endFillColor={colors.chartGreen + '05'}
           startOpacity={0.4}
           endOpacity={0.05}
         />
@@ -270,11 +270,11 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
           data={windData}
           {...commonLineProps}
           {...windYAxisProps}
-          color="#9C27B0"
-          dataPointsColor="#9C27B0"
+          color={colors.chartPurple}
+          dataPointsColor={colors.chartPurple}
           areaChart
-          startFillColor="rgba(156, 39, 176, 0.15)"
-          endFillColor="rgba(156, 39, 176, 0.02)"
+          startFillColor={colors.chartPurple + '26'}
+          endFillColor={colors.chartPurple + '05'}
           startOpacity={0.3}
           endOpacity={0.05}
         />

@@ -55,14 +55,14 @@ function getTrendIcon(trend: string): IoniconName {
   }
 }
 
-function getTrendColor(trend: string): string {
+function getTrendColor(trend: string, colors: { chartRed: string; chartBlue: string; textMuted: string }): string {
   switch (trend) {
     case 'rising':
-      return '#F44336';
+      return colors.chartRed;
     case 'falling':
-      return '#2196F3';
+      return colors.chartBlue;
     default:
-      return '#9E9E9E';
+      return colors.textMuted;
   }
 }
 
@@ -212,7 +212,7 @@ export default function HistoryScreen() {
       </Text>
 
       {/* Period Picker */}
-      <View style={[styles.segmentedControl, { backgroundColor: isDark ? colors.surface : '#E0E0E0' }]}>
+      <View style={[styles.segmentedControl, { backgroundColor: isDark ? colors.surface : colors.border }]}>
         {PERIODS.map(({ value, label }) => (
           <Pressable
             key={value}
@@ -290,7 +290,7 @@ export default function HistoryScreen() {
       {/* Inline error for custom mode */}
       {error && period === 'custom' && (
         <View style={[styles.inlineError, { backgroundColor: colors.card }]}>
-          <Ionicons name="alert-circle" size={20} color="#F44336" />
+          <Ionicons name="alert-circle" size={20} color={colors.error} />
           <Text style={[styles.inlineErrorText, { color: colors.text }]}>
             {error instanceof Error ? error.message : 'Failed to load history'}
           </Text>
@@ -313,7 +313,7 @@ export default function HistoryScreen() {
               <Ionicons
                 name={getTrendIcon(summary.temp_trend)}
                 size={24}
-                color={getTrendColor(summary.temp_trend)}
+                color={getTrendColor(summary.temp_trend, colors)}
               />
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {Math.round(summary.avg_temp)}{getTemperatureUnit(units)}
@@ -325,7 +325,7 @@ export default function HistoryScreen() {
 
             {/* High */}
             <View style={styles.summaryItem}>
-              <Ionicons name="arrow-up" size={24} color="#F44336" />
+              <Ionicons name="arrow-up" size={24} color={colors.chartRed} />
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {Math.round(summary.max_temp.value)}{getTemperatureUnit(units)}
               </Text>
@@ -336,7 +336,7 @@ export default function HistoryScreen() {
 
             {/* Low */}
             <View style={styles.summaryItem}>
-              <Ionicons name="arrow-down" size={24} color="#2196F3" />
+              <Ionicons name="arrow-down" size={24} color={colors.chartBlue} />
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {Math.round(summary.min_temp.value)}{getTemperatureUnit(units)}
               </Text>
@@ -347,7 +347,7 @@ export default function HistoryScreen() {
 
             {/* Precipitation */}
             <View style={styles.summaryItem}>
-              <Ionicons name="rainy" size={24} color="#2196F3" />
+              <Ionicons name="rainy" size={24} color={colors.chartBlue} />
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {Math.round(summary.total_precipitation * 10) / 10}mm
               </Text>
@@ -358,7 +358,7 @@ export default function HistoryScreen() {
 
             {/* Humidity */}
             <View style={styles.summaryItem}>
-              <Ionicons name="water" size={24} color="#4CAF50" />
+              <Ionicons name="water" size={24} color={colors.chartGreen} />
               <Text style={[styles.summaryValue, { color: colors.text }]}>
                 {Math.round(summary.avg_humidity)}%
               </Text>
@@ -384,7 +384,7 @@ export default function HistoryScreen() {
               styles.chartTab,
               {
                 backgroundColor: chartType === value
-                  ? (isDark ? colors.primaryLight : '#E3F2FD')
+                  ? colors.primaryLight
                   : (isDark ? colors.surface : colors.background),
                 borderColor: chartType === value ? colors.primary : colors.border,
               },
@@ -438,25 +438,25 @@ export default function HistoryScreen() {
               </View>
               <View style={styles.dayStats}>
                 <View style={styles.dayStat}>
-                  <Ionicons name="thermometer" size={14} color="#F44336" />
+                  <Ionicons name="thermometer" size={14} color={colors.chartRed} />
                   <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
                     {Math.round(day.temp_max)}/{Math.round(day.temp_min)}{getTemperatureUnit(units)}
                   </Text>
                 </View>
                 <View style={styles.dayStat}>
-                  <Ionicons name="water" size={14} color="#4CAF50" />
+                  <Ionicons name="water" size={14} color={colors.chartGreen} />
                   <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
                     {Math.round(day.humidity_avg)}%
                   </Text>
                 </View>
                 <View style={styles.dayStat}>
-                  <Ionicons name="rainy" size={14} color="#2196F3" />
+                  <Ionicons name="rainy" size={14} color={colors.chartBlue} />
                   <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
                     {Math.round(day.precipitation_total * 10) / 10}mm
                   </Text>
                 </View>
                 <View style={styles.dayStat}>
-                  <Ionicons name="speedometer" size={14} color="#9C27B0" />
+                  <Ionicons name="speedometer" size={14} color={colors.chartPurple} />
                   <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
                     {Math.round(day.wind_speed_avg)} {units === 'imperial' ? 'mph' : 'm/s'}
                   </Text>
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   dateError: {
-    color: '#F44336',
+    color: '#EF4444',
     fontSize: 12,
     marginTop: 8,
     textAlign: 'center',

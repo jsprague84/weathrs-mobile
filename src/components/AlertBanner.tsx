@@ -15,14 +15,14 @@ interface AlertBannerProps {
 const RED_KEYWORDS = ['Warning', 'Tornado', 'Hurricane', 'Tsunami', 'Emergency'];
 const ORANGE_KEYWORDS = ['Watch', 'Advisory'];
 
-function getSeverityColors(event: string): { bg: string; text: string } {
+function getSeverityColors(event: string, colors: { error: string; warning: string; chartYellow: string }): { bg: string; text: string } {
   if (RED_KEYWORDS.some((kw) => event.includes(kw))) {
-    return { bg: '#D32F2F', text: '#FFFFFF' };
+    return { bg: colors.error, text: '#FFFFFF' };
   }
   if (ORANGE_KEYWORDS.some((kw) => event.includes(kw))) {
-    return { bg: '#F57C00', text: '#FFFFFF' };
+    return { bg: colors.warning, text: '#FFFFFF' };
   }
-  return { bg: '#FFF176', text: '#212121' };
+  return { bg: colors.chartYellow, text: '#212121' };
 }
 
 function formatAlertTime(timestamp: number): string {
@@ -35,9 +35,9 @@ function formatAlertTime(timestamp: number): string {
   });
 }
 
-function AlertItem({ alert }: { alert: WeatherAlert }) {
+function AlertItem({ alert, colors }: { alert: WeatherAlert; colors: { error: string; warning: string; chartYellow: string } }) {
   const [expanded, setExpanded] = useState(false);
-  const severity = getSeverityColors(alert.event);
+  const severity = getSeverityColors(alert.event, colors);
 
   return (
     <TouchableOpacity
@@ -91,7 +91,7 @@ export function AlertBanner({ alerts }: AlertBannerProps) {
         </TouchableOpacity>
       </View>
       {alerts.length === 1 ? (
-        <AlertItem alert={alerts[0]} />
+        <AlertItem alert={alerts[0]} colors={colors} />
       ) : (
         <FlatList
           data={alerts}
@@ -102,7 +102,7 @@ export function AlertBanner({ alerts }: AlertBannerProps) {
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <View style={styles.listItem}>
-              <AlertItem alert={item} />
+              <AlertItem alert={item} colors={colors} />
             </View>
           )}
         />

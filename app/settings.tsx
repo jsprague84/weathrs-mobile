@@ -249,7 +249,7 @@ export default function SettingsScreen() {
                   styles.cityItem,
                   { borderBottomColor: colors.border },
                   city.id === selectedCityId && {
-                    backgroundColor: isDark ? colors.primaryLight : '#E3F2FD',
+                    backgroundColor: colors.primaryLight,
                   },
                 ]}
               >
@@ -334,7 +334,7 @@ export default function SettingsScreen() {
                   backgroundColor: isDark ? colors.surface : colors.background,
                   borderColor: units === unit ? colors.primary : 'transparent',
                 },
-                units === unit && { backgroundColor: isDark ? colors.primaryLight : '#E3F2FD' },
+                units === unit && { backgroundColor: colors.primaryLight },
               ]}
               onPress={() => handleUnitChange(unit)}
             >
@@ -364,7 +364,7 @@ export default function SettingsScreen() {
                   backgroundColor: isDark ? colors.surface : colors.background,
                   borderColor: themeMode === mode ? colors.primary : 'transparent',
                 },
-                themeMode === mode && { backgroundColor: isDark ? colors.primaryLight : '#E3F2FD' },
+                themeMode === mode && { backgroundColor: colors.primaryLight },
               ]}
               onPress={() => handleThemeChange(mode)}
             >
@@ -410,7 +410,7 @@ export default function SettingsScreen() {
             {/* API Budget */}
             <View>
               <Text style={[styles.statsLabel, { color: colors.text }]}>API Budget</Text>
-              <View style={[styles.progressBarBg, { backgroundColor: isDark ? colors.surface : '#E0E0E0' }]}>
+              <View style={[styles.progressBarBg, { backgroundColor: isDark ? colors.surface : colors.border }]}>
                 <View style={[
                   styles.progressBarFill,
                   {
@@ -418,7 +418,7 @@ export default function SettingsScreen() {
                     backgroundColor: stats.data.apiBudget.usedToday / stats.data.apiBudget.dailyLimit < 0.5
                       ? colors.success
                       : stats.data.apiBudget.usedToday / stats.data.apiBudget.dailyLimit < 0.8
-                        ? '#FFC107'
+                        ? colors.chartYellow
                         : colors.error,
                   },
                 ]} />
@@ -437,7 +437,7 @@ export default function SettingsScreen() {
                 {stats.data.history.cities.map((city) => {
                   const earliest = new Date(city.earliestTimestamp * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
                   const latest = new Date(city.latestTimestamp * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                  const statusColor = city.missingDays === 0 ? colors.success : city.missingDays < 30 ? '#FFC107' : colors.error;
+                  const statusColor = city.missingDays === 0 ? colors.success : city.missingDays < 30 ? colors.chartYellow : colors.error;
                   return (
                     <View key={city.city} style={styles.statsCityRow}>
                       <View style={[styles.statusDot, { backgroundColor: statusColor }]} />

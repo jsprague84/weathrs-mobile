@@ -39,7 +39,7 @@ function SkeletonBase({ width = '100%', height = 16, borderRadius = 4, style }: 
           width: width as number,
           height,
           borderRadius,
-          backgroundColor: isDark ? colors.surface : '#E0E0E0',
+          backgroundColor: isDark ? colors.surface : colors.border,
           opacity,
         },
         style,

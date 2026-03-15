@@ -33,15 +33,15 @@ export function StaleDataBanner({ dataUpdatedAt }: StaleDataBannerProps) {
 
   return (
     <View style={[styles.banner, {
-      backgroundColor: isVeryStale ? 'rgba(255, 193, 7, 0.15)' : 'rgba(158, 158, 158, 0.12)',
+      backgroundColor: isVeryStale ? colors.chartYellow + '26' : colors.textMuted + '1F',
     }]}>
       <Ionicons
         name="cloud-offline-outline"
         size={16}
-        color={isVeryStale ? '#F9A825' : colors.textMuted}
+        color={isVeryStale ? colors.chartYellow : colors.textMuted}
       />
       <Text style={[styles.text, {
-        color: isVeryStale ? '#F9A825' : colors.textMuted,
+        color: isVeryStale ? colors.chartYellow : colors.textMuted,
       }]}>
         {getRelativeTime(dataUpdatedAt)}
       </Text>

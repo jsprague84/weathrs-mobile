@@ -104,7 +104,7 @@ export default function ForecastScreen() {
       )}
 
       {/* Segmented Control */}
-      <View style={[styles.segmentedControl, { backgroundColor: isDark ? colors.surface : '#E0E0E0' }]}>
+      <View style={[styles.segmentedControl, { backgroundColor: isDark ? colors.surface : colors.border }]}>
         <Pressable
           style={[
             styles.segment,

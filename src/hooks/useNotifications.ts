@@ -168,7 +168,7 @@ export function useNotifications(): UseNotificationsReturn {
           name: 'Weather Alerts',
           importance: Notifications.AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#2196F3',
+          lightColor: '#3B82F6',
           sound: 'default',
         });
       }

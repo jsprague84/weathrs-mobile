@@ -85,7 +85,7 @@ export function CitySelector({ onAddCity }: CitySelectorProps) {
                     styles.cityItem,
                     { borderBottomColor: colors.border },
                     city.id === selectedCityId && {
-                      backgroundColor: isDark ? colors.primaryLight : '#E3F2FD',
+                      backgroundColor: colors.primaryLight,
                     },
                   ]}
                   onPress={() => handleSelectCity(city)}

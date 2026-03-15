@@ -10,12 +10,12 @@ interface AirQualityCardProps {
   data: AirQualityResponse;
 }
 
-function getAqiColor(aqi: number, colors: { success: string; warning: string; error: string }): string {
+function getAqiColor(aqi: number, colors: { success: string; warning: string; error: string; chartGreen: string; chartOrange: string }): string {
   switch (aqi) {
     case 1: return colors.success;
-    case 2: return '#8BC34A'; // light green
+    case 2: return colors.chartGreen;
     case 3: return colors.warning;
-    case 4: return '#FF9800'; // orange
+    case 4: return colors.chartOrange;
     case 5: return colors.error;
     default: return colors.warning;
   }

@@ -63,9 +63,9 @@ function getUVDescription(uvi: number): string {
   return 'Extreme';
 }
 
-function getUVColor(uvi: number, colors: { success: string; warning: string; error: string }): string {
+function getUVColor(uvi: number, colors: { success: string; warning: string; error: string; chartYellow: string }): string {
   if (uvi <= 2) return colors.success;
-  if (uvi <= 5) return '#FFC107'; // yellow
+  if (uvi <= 5) return colors.chartYellow;
   if (uvi <= 7) return colors.warning;
   return colors.error;
 }
@@ -118,10 +118,10 @@ export function WeatherCard({ weather, location, units = 'imperial' }: WeatherCa
       {/* Feels Like Callout */}
       {showFeelsLikeCallout && (
         <View style={[styles.feelsLikeCallout, {
-          backgroundColor: isWindChill ? 'rgba(33, 150, 243, 0.15)' : 'rgba(255, 152, 0, 0.15)',
+          backgroundColor: (isWindChill ? colors.chartBlue : colors.chartOrange) + '26',
         }]}>
           <Text style={[styles.feelsLikeCalloutText, {
-            color: isWindChill ? '#2196F3' : '#FF9800',
+            color: isWindChill ? colors.chartBlue : colors.chartOrange,
           }]}>
             Feels like {Math.round(weather.feels_like)}{tempUnit} · {isWindChill ? 'Wind chill' : 'Heat index'}
           </Text>
