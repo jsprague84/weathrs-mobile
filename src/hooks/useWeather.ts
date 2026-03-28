@@ -4,6 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/services/api';
+import { tileTracker } from '@/services/tileTracker';
 import { useSettingsStore } from '@/stores/settingsStore';
 import type { Units, HistoryPeriod } from '@/types';
 
@@ -213,7 +214,18 @@ export function useAirQuality(city?: string) {
 export function useStats() {
   return useQuery({
     queryKey: ['stats'],
-    queryFn: () => api.getStats(),
+    queryFn: async () => {
+      if (tileTracker.hasCounts()) {
+        const counts = tileTracker.getCounts();
+        try {
+          await api.reportTiles(counts.owmTiles, counts.googleMapsTiles);
+          tileTracker.reset();
+        } catch {
+          // Don't fail stats fetch if tile reporting fails
+        }
+      }
+      return api.getStats();
+    },
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000,
   });

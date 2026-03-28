@@ -1,7 +1,8 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import MapView, { UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTheme } from '@/theme';
+import { tileTracker } from '@/services/tileTracker';
 import { RadarLegend, type RadarLayer } from './RadarLegend';
 
 const OWM_API_KEY = process.env.EXPO_PUBLIC_OWM_API_KEY ?? '';
@@ -25,6 +26,17 @@ export function RadarMap({ lat, lon, activeLayer }: RadarMapProps) {
   const { isDark } = useTheme();
   const mapRef = useRef<MapView>(null);
   const prevCoords = useRef({ lat, lon });
+
+  // Count initial tile load on mount
+  useEffect(() => {
+    tileTracker.incrementOWM();
+    tileTracker.incrementGoogleMaps();
+  }, []);
+
+  const handleRegionChange = useCallback(() => {
+    tileTracker.incrementOWM();
+    tileTracker.incrementGoogleMaps();
+  }, []);
 
   // Animate to new coordinates when lat/lon props change (but not on initial mount)
   useEffect(() => {
@@ -57,6 +69,7 @@ export function RadarMap({ lat, lon, activeLayer }: RadarMapProps) {
           latitudeDelta: 3,
           longitudeDelta: 3,
         }}
+        onRegionChangeComplete={handleRegionChange}
         showsUserLocation
         showsMyLocationButton={false}
         showsCompass={false}
