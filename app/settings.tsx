@@ -9,7 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettingsStore, type ThemeMode } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
-import { useLocation, reverseGeocode, formatLocationQuery } from '@/hooks/useLocation';
+import { useLocation } from '@/hooks/useLocation';
+import { resolveLocation, resolveCoordinates } from '@/services/location';
 import { Button, Card, Loading } from '@/components';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useStats } from '@/hooks/useWeather';
@@ -61,34 +62,39 @@ export default function SettingsScreen() {
   };
 
   const handleAddCity = async () => {
-    const cityName = newCityName.trim();
-    if (!cityName) {
+    const input = newCityName.trim();
+    if (!input) {
       Alert.alert('Error', 'Please enter a city name or zip code');
       return;
     }
-    if (cityName.length > 100) {
+    if (input.length > 100) {
       Alert.alert('Error', 'City name is too long (max 100 characters)');
       return;
     }
 
-    // Check if city already exists
-    const exists = cities.some(
-      (c) => c.name.toLowerCase() === cityName.toLowerCase()
-    );
-    if (exists) {
-      Alert.alert('Error', 'This city is already saved');
-      return;
+    setIsAddingLocation(true);
+
+    try {
+      const location = await resolveLocation(input);
+
+      addCity(
+        { name: location.name, lat: location.lat, lon: location.lon, country: location.country, state: location.state ?? undefined },
+        undefined
+      );
+
+      await notification(NotificationFeedbackType.Success);
+      setNewCityName('');
+
+      // Also set as default city for legacy compatibility
+      if (!defaultCity) {
+        setDefaultCity(location.name);
+      }
+    } catch (error) {
+      await notification(NotificationFeedbackType.Error);
+      Alert.alert('Error', 'Could not find that location. Try a city name or ZIP code.');
     }
 
-    await notification(NotificationFeedbackType.Success);
-
-    addCity(cityName);
-    setNewCityName('');
-
-    // Also set as default city for legacy compatibility
-    if (!defaultCity) {
-      setDefaultCity(cityName);
-    }
+    setIsAddingLocation(false);
   };
 
   const handleUseLocation = async () => {
@@ -97,53 +103,26 @@ export default function SettingsScreen() {
     setIsAddingLocation(true);
 
     try {
-      const location = await requestLocation();
+      const coords = await requestLocation();
 
-      if (!location) {
+      if (!coords) {
         setIsAddingLocation(false);
         return;
       }
 
-      const { latitude, longitude } = location;
+      const location = await resolveCoordinates(coords.latitude, coords.longitude);
 
-      // Try to get the city name via reverse geocoding
-      const cityName = await reverseGeocode(latitude, longitude);
+      addCity(
+        { name: location.name, lat: location.lat, lon: location.lon, country: location.country, state: location.state ?? undefined },
+        'My Location'
+      );
 
-      if (cityName) {
-        // Check if city already exists
-        const exists = cities.some(
-          (c) => c.name.toLowerCase() === cityName.toLowerCase()
-        );
-
-        if (exists) {
-          // Find and select the existing city
-          const existingCity = cities.find(
-            (c) => c.name.toLowerCase() === cityName.toLowerCase()
-          );
-          if (existingCity) {
-            selectCity(existingCity.id);
-            setDefaultCity(existingCity.name);
-          }
-          await notification(NotificationFeedbackType.Success);
-          Alert.alert('Location Found', `Selected "${cityName}" as your current location.`);
-        } else {
-          // Add new city with display name "My Location"
-          addCity(cityName, 'My Location');
-          setDefaultCity(cityName);
-          await notification(NotificationFeedbackType.Success);
-          Alert.alert('Location Added', `Added "${cityName}" as "My Location".`);
-        }
-      } else {
-        // Fall back to coordinates if reverse geocoding fails
-        const coordQuery = formatLocationQuery(latitude, longitude);
-        addCity(coordQuery, 'My Location');
-        setDefaultCity(coordQuery);
-        await notification(NotificationFeedbackType.Success);
-        Alert.alert('Location Added', 'Added your current location.');
-      }
+      setDefaultCity(location.name);
+      await notification(NotificationFeedbackType.Success);
+      Alert.alert('Location Added', `Added "${location.name}" as "My Location".`);
     } catch (error) {
       await notification(NotificationFeedbackType.Error);
-      Alert.alert('Error', 'Failed to get your location. Please try again.');
+      Alert.alert('Error', 'Could not resolve your location.');
     }
 
     setIsAddingLocation(false);
