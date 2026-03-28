@@ -10,6 +10,10 @@ export interface SavedCity {
   id: string;
   name: string;
   displayName?: string; // Optional custom display name
+  lat: number;
+  lon: number;
+  country: string;
+  state?: string;
   addedAt: number;
 }
 
@@ -19,15 +23,17 @@ interface CitiesState {
   selectedCityId: string | null;
 
   // Actions
-  addCity: (name: string, displayName?: string) => void;
+  addCity: (location: { name: string; lat: number; lon: number; country: string; state?: string }, displayName?: string) => void;
   removeCity: (id: string) => void;
   selectCity: (id: string) => void;
   updateCityDisplayName: (id: string, displayName: string) => void;
   reorderCities: (cities: SavedCity[]) => void;
+  migrateCity: (id: string, location: { lat: number; lon: number; country: string; state?: string; name: string }) => void;
 
   // Computed
   getSelectedCity: () => SavedCity | null;
   getCityById: (id: string) => SavedCity | undefined;
+  needsMigration: () => boolean;
 }
 
 function generateId(): string {
@@ -40,25 +46,28 @@ const citiesStore = create<CitiesState>()(
       cities: [],
       selectedCityId: null,
 
-      addCity: (name: string, displayName?: string) => {
+      addCity: (location, displayName) => {
         const newCity: SavedCity = {
           id: generateId(),
-          name: name.trim(),
+          name: location.name,
           displayName: displayName?.trim() || undefined,
+          lat: location.lat,
+          lon: location.lon,
+          country: location.country,
+          state: location.state,
           addedAt: Date.now(),
         };
 
         set((state) => {
-          // Check if city already exists
+          // Check for duplicate by coordinates
           const exists = state.cities.some(
-            (c) => c.name.toLowerCase() === name.trim().toLowerCase()
+            (c) => c.lat === location.lat && c.lon === location.lon
           );
           if (exists) return state;
 
           const updatedCities = [...state.cities, newCity];
           return {
             cities: updatedCities,
-            // Auto-select if it's the first city
             selectedCityId: state.selectedCityId || newCity.id,
           };
         });
@@ -97,6 +106,37 @@ const citiesStore = create<CitiesState>()(
         set({ cities });
       },
 
+      migrateCity: (id: string, location: { lat: number; lon: number; country: string; state?: string; name: string }) => {
+        set((state) => {
+          // Check if another city already has these coordinates
+          const duplicate = state.cities.find(
+            (c) => c.id !== id && c.lat === location.lat && c.lon === location.lon
+          );
+
+          if (duplicate) {
+            // Remove the current city and select the duplicate if needed
+            const updatedCities = state.cities.filter((c) => c.id !== id);
+            return {
+              cities: updatedCities,
+              selectedCityId: state.selectedCityId === id ? duplicate.id : state.selectedCityId,
+            };
+          }
+
+          // Update the city with coordinates
+          return {
+            cities: state.cities.map((c) =>
+              c.id === id
+                ? { ...c, lat: location.lat, lon: location.lon, country: location.country, state: location.state, name: location.name }
+                : c
+            ),
+          };
+        });
+      },
+
+      needsMigration: () => {
+        return get().cities.some((c) => (c as any).lat === undefined || (c as any).lon === undefined);
+      },
+
       getSelectedCity: () => {
         const { cities, selectedCityId } = get();
         return cities.find((c) => c.id === selectedCityId) || null;
@@ -133,4 +173,5 @@ export const useCitiesActions = () => citiesStore((s) => ({
   updateCityDisplayName: s.updateCityDisplayName,
   reorderCities: s.reorderCities,
   getCityById: s.getCityById,
+  migrateCity: s.migrateCity,
 }));
