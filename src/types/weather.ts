@@ -300,11 +300,16 @@ export interface StatsResponse {
     totalRecords: number;
     cities: Array<{
       city: string;
+      locationKey: string;
       recordCount: number;
       earliestTimestamp: number;
       latestTimestamp: number;
       missingDays: number;
     }>;
+  };
+  tileUsage: {
+    owmTiles: { usedToday: number; dailyLimit: number };
+    googleMapsTiles: { usedToday: number; dailyLimit: number };
   };
   devices: {
     total: number;

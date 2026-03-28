@@ -326,6 +326,29 @@ class WeathrsApi {
     params.append('q', query);
     return this.request(`/geocode?${params.toString()}`, { timeout: TIMEOUT.FAST });
   }
+
+  // History management
+  async deleteHistory(locationKey: string): Promise<{ success: boolean; deleted: number }> {
+    return this.request(`/history/location/${encodeURIComponent(locationKey)}`, {
+      method: 'DELETE',
+      useApiKey: true,
+    });
+  }
+
+  async cleanupHistory(): Promise<{ success: boolean; updated: number }> {
+    return this.request('/history/cleanup', {
+      method: 'POST',
+      useApiKey: true,
+    });
+  }
+
+  // Tile usage reporting
+  async reportTiles(owmTiles: number, googleMapsTiles: number): Promise<{ success: boolean }> {
+    return this.request('/stats/tiles', {
+      method: 'POST',
+      body: JSON.stringify({ owm_tiles: owmTiles, google_maps_tiles: googleMapsTiles }),
+    });
+  }
 }
 
 // Default instance - URL will be configured from settings
