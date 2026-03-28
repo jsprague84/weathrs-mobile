@@ -31,7 +31,7 @@ const LEGEND_CONFIG: Record<RadarLayer, LegendConfig> = {
   },
   wind_new: {
     label: 'Wind Speed',
-    colors: ['#4caf50', '#8bc34a', '#ffeb3b', '#ff9800', '#f44336'],
+    colors: ['#ffffff', '#aed8e6', '#63b8f2', '#4882c8', '#a060fa', '#dc42ef'],
     startLabel: 'Calm',
     endLabel: 'Strong',
   },
