@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, Alert, Activi
 import { useState, useEffect } from 'react';
 import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSettingsStore, type ThemeMode } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
@@ -14,6 +15,7 @@ import { resolveLocation, resolveCoordinates } from '@/services/location';
 import { Button, Card, Loading, SchedulerModal } from '@/components';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useStats } from '@/hooks/useWeather';
+import api from '@/services/api';
 import type { Units } from '@/types';
 
 export default function SettingsScreen() {
@@ -23,6 +25,7 @@ export default function SettingsScreen() {
   const { selection, notification } = useHaptics();
   const { requestLocation, loading: locationLoading, hasPermission } = useLocation();
 
+  const queryClient = useQueryClient();
   const stats = useStats();
   const [localApiUrl, setLocalApiUrl] = useState(apiUrl);
   const [newCityName, setNewCityName] = useState('');
@@ -463,28 +466,133 @@ export default function SettingsScreen() {
               </Text>
             </View>
 
+            {/* Tile Usage */}
+            {stats.data.tileUsage && (
+              <View>
+                <Text style={[styles.statsLabel, { color: colors.text }]}>Tile Usage</Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <Text style={[styles.statsCityName, { color: colors.text }]}>OWM Tiles</Text>
+                  <Text style={[styles.statsValue, { color: colors.textSecondary, marginTop: 0 }]}>
+                    {stats.data.tileUsage.owmTiles.usedToday} / {stats.data.tileUsage.owmTiles.dailyLimit}
+                  </Text>
+                </View>
+                <View style={[styles.progressBarBg, { backgroundColor: isDark ? colors.surface : colors.border }]}>
+                  <View style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${Math.min((stats.data.tileUsage.owmTiles.usedToday / stats.data.tileUsage.owmTiles.dailyLimit) * 100, 100)}%`,
+                      backgroundColor:
+                        stats.data.tileUsage.owmTiles.usedToday / stats.data.tileUsage.owmTiles.dailyLimit < 0.5
+                          ? colors.success
+                          : stats.data.tileUsage.owmTiles.usedToday / stats.data.tileUsage.owmTiles.dailyLimit < 0.8
+                            ? colors.chartYellow
+                            : colors.error,
+                    },
+                  ]} />
+                </View>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4, marginTop: 10 }}>
+                  <Text style={[styles.statsCityName, { color: colors.text }]}>Google Maps</Text>
+                  <Text style={[styles.statsValue, { color: colors.textSecondary, marginTop: 0 }]}>
+                    {stats.data.tileUsage.googleMapsTiles.usedToday} / {stats.data.tileUsage.googleMapsTiles.dailyLimit}
+                  </Text>
+                </View>
+                <View style={[styles.progressBarBg, { backgroundColor: isDark ? colors.surface : colors.border }]}>
+                  <View style={[
+                    styles.progressBarFill,
+                    {
+                      width: `${Math.min((stats.data.tileUsage.googleMapsTiles.usedToday / stats.data.tileUsage.googleMapsTiles.dailyLimit) * 100, 100)}%`,
+                      backgroundColor:
+                        stats.data.tileUsage.googleMapsTiles.usedToday / stats.data.tileUsage.googleMapsTiles.dailyLimit < 0.5
+                          ? colors.success
+                          : stats.data.tileUsage.googleMapsTiles.usedToday / stats.data.tileUsage.googleMapsTiles.dailyLimit < 0.8
+                            ? colors.chartYellow
+                            : colors.error,
+                    },
+                  ]} />
+                </View>
+              </View>
+            )}
+
             {/* History Coverage */}
             {stats.data.history.cities.length > 0 && (
               <View>
                 <Text style={[styles.statsLabel, { color: colors.text }]}>
                   History ({stats.data.history.totalRecords.toLocaleString()} records)
                 </Text>
-                {stats.data.history.cities.map((city) => {
-                  const earliest = new Date(city.earliestTimestamp * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                  const latest = new Date(city.latestTimestamp * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                  const statusColor = city.missingDays === 0 ? colors.success : city.missingDays < 30 ? colors.chartYellow : colors.error;
+                {stats.data.history.cities.map((cityStat) => {
+                  const earliest = new Date(cityStat.earliestTimestamp * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  const latest = new Date(cityStat.latestTimestamp * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  const statusColor = cityStat.missingDays === 0 ? colors.success : cityStat.missingDays < 30 ? colors.chartYellow : colors.error;
                   return (
-                    <View key={city.city} style={styles.statsCityRow}>
+                    <View key={cityStat.city} style={styles.statsCityRow}>
                       <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
                       <View style={{ flex: 1 }}>
-                        <Text style={[styles.statsCityName, { color: colors.text }]}>{city.city}</Text>
+                        <Text style={[styles.statsCityName, { color: colors.text }]}>{cityStat.city}</Text>
+                        <Text style={{ fontSize: 10, color: colors.textMuted }}>{cityStat.locationKey}</Text>
                         <Text style={[styles.statsCityDetail, { color: colors.textMuted }]}>
-                          {earliest} — {latest} | {city.recordCount.toLocaleString()} records | {city.missingDays} missing days
+                          {earliest} — {latest} | {cityStat.recordCount.toLocaleString()} records | {cityStat.missingDays} missing days
                         </Text>
                       </View>
+                      <Pressable
+                        onPress={() => {
+                          Alert.alert(
+                            'Delete History',
+                            `Delete all history for ${cityStat.city}? ${cityStat.recordCount} records will be permanently removed.`,
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Delete',
+                                style: 'destructive',
+                                onPress: async () => {
+                                  try {
+                                    await api.deleteHistory(cityStat.locationKey);
+                                    queryClient.invalidateQueries({ queryKey: ['stats'] });
+                                  } catch (e) {
+                                    Alert.alert('Error', 'Failed to delete history');
+                                  }
+                                },
+                              },
+                            ]
+                          );
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Delete history for ${cityStat.city}`}
+                      >
+                        <Ionicons name="trash-outline" size={18} color={colors.error} />
+                      </Pressable>
                     </View>
                   );
                 })}
+
+                <Pressable
+                  onPress={async () => {
+                    try {
+                      const result = await api.cleanupHistory();
+                      Alert.alert('Cleanup Complete', `Updated ${result.updated} records`);
+                      queryClient.invalidateQueries({ queryKey: ['stats'] });
+                    } catch (e) {
+                      Alert.alert('Error', 'Cleanup failed');
+                    }
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 10,
+                    marginTop: 8,
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    backgroundColor: colors.card,
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clean up duplicate location records"
+                >
+                  <Ionicons name="sparkles-outline" size={16} color={colors.primary} />
+                  <Text style={{ color: colors.primary, fontSize: 13, marginLeft: 6 }}>Clean Up Duplicates</Text>
+                </Pressable>
               </View>
             )}
 
