@@ -81,6 +81,7 @@ export function RadarMap({ lat, lon, activeLayer }: RadarMapProps) {
           tileSize={256}
           opacity={0.7}
           zIndex={1}
+          tileCacheMaxAge={300}
         />
       </MapView>
 
