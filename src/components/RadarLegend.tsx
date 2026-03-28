@@ -13,25 +13,25 @@ interface LegendConfig {
 const LEGEND_CONFIG: Record<RadarLayer, LegendConfig> = {
   precipitation_new: {
     label: 'Precipitation',
-    colors: ['#00c853', '#76ff03', '#ffeb3b', '#ff9800', '#f44336', '#9c27b0'],
+    colors: ['#7878BE', '#6E6ECD', '#5050E1', '#3232F0', '#1414FF'],
     startLabel: 'Light',
     endLabel: 'Heavy',
   },
   clouds_new: {
     label: 'Cloud Cover',
-    colors: ['#e0e0e0', '#bdbdbd', '#9e9e9e', '#757575', '#616161', '#424242'],
+    colors: ['#FDFDFF', '#F7F7FF', '#F4F4FF', '#E9E9DF', '#DEDEDE', '#D2D2D2'],
     startLabel: 'Thin',
     endLabel: 'Dense',
   },
   temp_new: {
     label: 'Temperature',
-    colors: ['#2196f3', '#4caf50', '#ffeb3b', '#ff9800', '#f44336', '#9c27b0'],
+    colors: ['#821692', '#8257DB', '#208CEC', '#23DDDD', '#C2FF28', '#FFF028', '#FC8014'],
     startLabel: 'Cold',
     endLabel: 'Hot',
   },
   wind_new: {
     label: 'Wind Speed',
-    colors: ['#ffffff', '#aed8e6', '#63b8f2', '#4882c8', '#a060fa', '#dc42ef'],
+    colors: ['#EECECC', '#C9A4C3', '#B364BC', '#6D2E8A', '#3F213B', '#0D1126'],
     startLabel: 'Calm',
     endLabel: 'Strong',
   },
