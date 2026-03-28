@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import MapView, { UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTheme } from '@/theme';
@@ -24,6 +24,23 @@ interface RadarMapProps {
 export function RadarMap({ lat, lon, activeLayer }: RadarMapProps) {
   const { isDark } = useTheme();
   const mapRef = useRef<MapView>(null);
+  const prevCoords = useRef({ lat, lon });
+
+  // Animate to new coordinates when lat/lon props change (but not on initial mount)
+  useEffect(() => {
+    if (prevCoords.current.lat !== lat || prevCoords.current.lon !== lon) {
+      prevCoords.current = { lat, lon };
+      mapRef.current?.animateToRegion(
+        {
+          latitude: lat,
+          longitude: lon,
+          latitudeDelta: 3,
+          longitudeDelta: 3,
+        },
+        500,
+      );
+    }
+  }, [lat, lon]);
 
   const tileUrl = `https://tile.openweathermap.org/map/${activeLayer}/{z}/{x}/{y}.png?appid=${OWM_API_KEY}`;
 
@@ -49,8 +66,6 @@ export function RadarMap({ lat, lon, activeLayer }: RadarMapProps) {
           urlTemplate={tileUrl}
           maximumZ={12}
           tileSize={256}
-          tileCachePath={`${activeLayer}_cache`}
-          tileCacheMaxAge={300}
           opacity={0.7}
           zIndex={1}
         />

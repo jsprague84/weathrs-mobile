@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
@@ -19,9 +19,21 @@ export default function RadarScreen() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number } | null>(null);
 
-  // Use map center override or fall back to selected city
+  // Use map center override or fall back to selected city, then US center
   const displayLat = mapCenter?.lat ?? lat ?? 39.83;
   const displayLon = mapCenter?.lon ?? lon ?? -98.58;
+
+  // When city coordinates become available (store hydration), update map center
+  const hasInitialized = useRef(false);
+  useEffect(() => {
+    if (!hasInitialized.current && lat != null && lon != null) {
+      hasInitialized.current = true;
+      // Only auto-center if user hasn't manually set a location
+      if (!mapCenter) {
+        setMapCenter({ lat, lon });
+      }
+    }
+  }, [lat, lon, mapCenter]);
 
   const handleMyLocation = useCallback(async () => {
     const coords = await requestLocation();
