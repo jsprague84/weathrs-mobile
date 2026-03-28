@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider, useTheme } from '@/theme';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useCityMigration } from '@/hooks/useCityMigration';
 
 // Configure QueryClient with persistence-friendly settings
 const queryClient = new QueryClient({
@@ -82,6 +83,9 @@ function TabsNavigator() {
   useEffect(() => {
     initializeSettings();
   }, [initializeSettings]);
+
+  // Migrate saved cities that lack coordinates (one-time, post-update)
+  useCityMigration();
 
   return (
     <>
