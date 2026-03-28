@@ -25,6 +25,7 @@ import type {
   WidgetResponse,
   AirQualityResponse,
   StatsResponse,
+  GeocodedLocation,
 } from '@/types';
 
 /** Per-endpoint timeout presets (ms) */
@@ -317,6 +318,13 @@ class WeathrsApi {
       body: JSON.stringify({ token }),
       useApiKey: true,
     });
+  }
+
+  // Geocoding
+  async geocode(query: string): Promise<GeocodedLocation> {
+    const params = new URLSearchParams();
+    params.append('q', query);
+    return this.request(`/geocode?${params.toString()}`, { timeout: TIMEOUT.FAST });
   }
 }
 

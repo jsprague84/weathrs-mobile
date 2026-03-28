@@ -120,6 +120,15 @@ export interface WeatherAlert {
 
 export type Units = 'metric' | 'imperial' | 'standard';
 
+export interface GeocodedLocation {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  state: string | null;
+  location_key: string;
+}
+
 export interface SchedulerStatus {
   running: boolean;
   job_count: number;
