@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
@@ -8,11 +8,12 @@ import { resolveCoordinates } from '@/services/location';
 import { RadarMap } from '@/components/RadarMap';
 import { RadarLayerPicker } from '@/components/RadarLayerPicker';
 import { RadarPlayback } from '@/components/RadarPlayback';
+import { CitySelector } from '@/components/CitySelector';
 import type { RadarLayer } from '@/components/RadarLegend';
 
 export default function RadarScreen() {
   const { colors } = useTheme();
-  const { cityDisplayName, lat, lon } = useCityToQuery({ withDisplay: true });
+  const { lat, lon } = useCityToQuery({ withDisplay: true });
   const { requestLocation } = useLocation();
 
   const [activeLayer, setActiveLayer] = useState<RadarLayer>('precipitation_new');
@@ -23,17 +24,12 @@ export default function RadarScreen() {
   const displayLat = mapCenter?.lat ?? lat ?? 39.83;
   const displayLon = mapCenter?.lon ?? lon ?? -98.58;
 
-  // When city coordinates become available (store hydration), update map center
-  const hasInitialized = useRef(false);
+  // Re-center map when selected city changes
   useEffect(() => {
-    if (!hasInitialized.current && lat != null && lon != null) {
-      hasInitialized.current = true;
-      // Only auto-center if user hasn't manually set a location
-      if (!mapCenter) {
-        setMapCenter({ lat, lon });
-      }
+    if (lat != null && lon != null) {
+      setMapCenter({ lat, lon });
     }
-  }, [lat, lon, mapCenter]);
+  }, [lat, lon]);
 
   const handleMyLocation = useCallback(async () => {
     const coords = await requestLocation();
@@ -54,9 +50,7 @@ export default function RadarScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface }]}>
-        <Text style={[styles.cityName, { color: colors.text }]}>
-          {cityDisplayName || 'Select a city'}
-        </Text>
+        <CitySelector />
         <Pressable
           onPress={handleMyLocation}
           style={[styles.locationButton, { backgroundColor: colors.card }]}
