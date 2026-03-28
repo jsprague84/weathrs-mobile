@@ -3,7 +3,7 @@
  */
 
 import { useState, useTransition } from 'react';
-import { View, Text, StyleSheet, RefreshControl, Pressable } from 'react-native';
+import { View, Text, StyleSheet, RefreshControl, ScrollView, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -11,11 +11,11 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import api from '@/services/api';
-import { DailyForecastCard, HourlyForecastCard, CitySelector, Loading, ErrorDisplay, StaleDataBanner, CurrentDateTime } from '@/components';
+import { DailyForecastCard, HourlyForecastCard, WeatherCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary, StaleDataBanner, CurrentDateTime } from '@/components';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import type { DailyForecast, HourlyForecast } from '@/types';
 
-type ForecastView = 'daily' | 'hourly';
+type ForecastView = 'daily' | 'hourly' | 'charts';
 
 export default function ForecastScreen() {
   const { units } = useSettingsStore();
@@ -42,6 +42,13 @@ export default function ForecastScreen() {
     staleTime: 10 * 60 * 1000,
   });
 
+  const chartsQuery = useQuery({
+    queryKey: ['forecast', 'full', cityToQuery, units],
+    queryFn: () => api.getFullForecast(cityToQuery, units),
+    enabled: !!cityToQuery && activeView === 'charts',
+    staleTime: 10 * 60 * 1000,
+  });
+
   const handleViewChange = async (view: ForecastView) => {
     await selection();
     startTransition(() => {
@@ -53,12 +60,12 @@ export default function ForecastScreen() {
     router.push('/settings');
   };
 
-  const activeQuery = activeView === 'daily' ? dailyQuery : hourlyQuery;
+  const activeQuery = activeView === 'daily' ? dailyQuery : activeView === 'hourly' ? hourlyQuery : chartsQuery;
   const isLoading = activeQuery.isLoading;
   const error = activeQuery.error;
   const isRefetching = activeQuery.isRefetching;
   const refetch = activeQuery.refetch;
-  const hasData = activeView === 'daily' ? !!dailyQuery.data : !!hourlyQuery.data;
+  const hasData = activeView === 'daily' ? !!dailyQuery.data : activeView === 'hourly' ? !!hourlyQuery.data : !!chartsQuery.data;
   const dataUpdatedAt = activeQuery.dataUpdatedAt;
 
   if (!cityToQuery) {
@@ -145,6 +152,26 @@ export default function ForecastScreen() {
             Hourly
           </Text>
         </Pressable>
+        <Pressable
+          style={[
+            styles.segment,
+            activeView === 'charts' && { backgroundColor: colors.card },
+          ]}
+          onPress={() => handleViewChange('charts')}
+          accessibilityRole="tab"
+          accessibilityLabel="Weather charts"
+          accessibilityState={{ selected: activeView === 'charts' }}
+        >
+          <Text
+            style={[
+              styles.segmentText,
+              { color: activeView === 'charts' ? colors.primary : colors.textSecondary },
+              activeView === 'charts' && styles.segmentTextActive,
+            ]}
+          >
+            Charts
+          </Text>
+        </Pressable>
       </View>
 
       <View style={{ flex: 1, opacity: isPending ? 0.7 : 1 }}>
@@ -176,7 +203,7 @@ export default function ForecastScreen() {
             />
           }
         />
-      ) : (
+      ) : activeView === 'hourly' ? (
         <FlashList
           data={hourlyQuery.data?.hourly ?? []}
           renderItem={({ item }) => (
@@ -204,6 +231,37 @@ export default function ForecastScreen() {
             />
           }
         />
+      ) : (
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={colors.primary}
+            />
+          }
+        >
+          <View style={styles.listHeader}>
+            <Text style={[styles.header, { color: colors.text }]}>Weather Charts</Text>
+            <Text style={[styles.city, { color: colors.textSecondary }]}>
+              {cityDisplayName}
+            </Text>
+          </View>
+          {chartsQuery.data && (
+            <ErrorBoundary>
+              <WeatherCharts
+                hourlyData={chartsQuery.data.hourly}
+                dailyData={chartsQuery.data.daily}
+                units={units}
+              />
+            </ErrorBoundary>
+          )}
+          <Text style={[styles.hint, { color: colors.textMuted }]}>
+            Pull down to refresh
+          </Text>
+        </ScrollView>
       )}
       </View>
     </View>

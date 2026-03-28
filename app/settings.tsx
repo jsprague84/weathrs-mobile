@@ -11,7 +11,7 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import { useLocation } from '@/hooks/useLocation';
 import { resolveLocation, resolveCoordinates } from '@/services/location';
-import { Button, Card, Loading } from '@/components';
+import { Button, Card, Loading, SchedulerModal } from '@/components';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useStats } from '@/hooks/useWeather';
 import type { Units } from '@/types';
@@ -27,6 +27,7 @@ export default function SettingsScreen() {
   const [localApiUrl, setLocalApiUrl] = useState(apiUrl);
   const [newCityName, setNewCityName] = useState('');
   const [isAddingLocation, setIsAddingLocation] = useState(false);
+  const [schedulerVisible, setSchedulerVisible] = useState(false);
 
   useEffect(() => {
     setLocalApiUrl(apiUrl);
@@ -402,6 +403,27 @@ export default function SettingsScreen() {
       </Card>
 
       <Card>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Notifications</Text>
+        <Pressable
+          style={[styles.settingRow, { borderBottomColor: colors.border }]}
+          onPress={() => setSchedulerVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Manage scheduled forecasts"
+        >
+          <View style={styles.settingLabel}>
+            <Ionicons name="notifications-outline" size={20} color={colors.textSecondary} />
+            <Text style={[styles.settingText, { color: colors.text }]}>Scheduled Forecasts</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </Pressable>
+      </Card>
+
+      <SchedulerModal
+        visible={schedulerVisible}
+        onClose={() => setSchedulerVisible(false)}
+      />
+
+      <Card>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Current Settings</Text>
         <Text style={[styles.infoText, { color: colors.textSecondary }]}>API: {apiUrl}</Text>
         <Text style={[styles.infoText, { color: colors.textSecondary }]}>
@@ -657,4 +679,19 @@ const styles = StyleSheet.create({
   statsCityName: { fontSize: 14, fontWeight: '500' },
   statsCityDetail: { fontSize: 11, marginTop: 2 },
   statsTimestamp: { fontSize: 11, textAlign: 'center' as const, marginTop: 4 },
+  settingRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  settingLabel: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 12,
+  },
+  settingText: {
+    fontSize: 16,
+  },
 });

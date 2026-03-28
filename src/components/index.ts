@@ -7,6 +7,7 @@ export { WeatherCharts } from './WeatherCharts';
 export { HistoryCharts } from './HistoryCharts';
 export { NotificationSettings } from './NotificationSettings';
 export { AirQualityCard } from './AirQualityCard';
+export { SchedulerModal } from './SchedulerModal';
 
 // UI Components
 export { Button, Card, Loading, ErrorDisplay, ErrorBoundary, Skeleton, StaleDataBanner, CurrentDateTime } from './ui';

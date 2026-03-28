@@ -124,12 +124,12 @@ function TabsNavigator() {
           }}
         />
         <Tabs.Screen
-          name="charts"
+          name="radar"
           options={{
-            title: 'Charts',
-            tabBarLabel: 'Charts',
+            title: 'Radar',
+            tabBarLabel: 'Radar',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="stats-chart" size={size} color={color} />
+              <Ionicons name="map-outline" size={size} color={color} />
             ),
           }}
         />
@@ -140,16 +140,6 @@ function TabsNavigator() {
             tabBarLabel: 'History',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="time-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="scheduler"
-          options={{
-            title: 'Scheduler',
-            tabBarLabel: 'Notify',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="notifications-outline" size={size} color={color} />
             ),
           }}
         />
