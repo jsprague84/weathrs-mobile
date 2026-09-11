@@ -11,7 +11,6 @@ import { Platform, Alert } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
-import api from '@/services/api';
 import { useNotificationsStore } from '@/stores/notificationsStore';
 
 /**

@@ -34,7 +34,7 @@ export function useLocation(): UseLocationReturn {
       try {
         const { status } = await Location.getForegroundPermissionsAsync();
         setState((prev) => ({ ...prev, permissionStatus: status }));
-      } catch (error) {
+      } catch {
         // Permission check failed, will request on demand
       }
     };

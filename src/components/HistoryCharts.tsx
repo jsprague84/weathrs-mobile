@@ -85,39 +85,41 @@ export function HistoryCharts({ data, chartType, units = 'imperial' }: HistoryCh
 
   const labelInterval = data.length > 14 ? 3 : data.length > 7 ? 2 : 1;
 
-  const makeLabels = (d: DailyHistorySummary, i: number) =>
-    i % labelInterval === 0 ? formatDate(d.date) : '';
+  const labels = useMemo(
+    () => data.map((d, i) => (i % labelInterval === 0 ? formatDate(d.date) : '')),
+    [data, labelInterval],
+  );
 
   const highData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.temp_max),
-    label: makeLabels(d, i),
-  })), [data, labelInterval]);
+    label: labels[i],
+  })), [data, labels]);
 
   const lowData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.temp_min),
-    label: makeLabels(d, i),
-  })), [data, labelInterval]);
+    label: labels[i],
+  })), [data, labels]);
 
   const avgData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.temp_avg),
-    label: makeLabels(d, i),
-  })), [data, labelInterval]);
+    label: labels[i],
+  })), [data, labels]);
 
   const precipData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.precipitation_total * 10) / 10,
-    label: makeLabels(d, i),
+    label: labels[i],
     frontColor: colors.chartBlue + 'B3',
-  })), [data, labelInterval, colors.chartBlue]);
+  })), [data, labels, colors.chartBlue]);
 
   const humidityData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.humidity_avg),
-    label: makeLabels(d, i),
-  })), [data, labelInterval]);
+    label: labels[i],
+  })), [data, labels]);
 
   const windData = useMemo(() => data.map((d, i) => ({
     value: Math.round(d.wind_speed_avg * 10) / 10,
-    label: makeLabels(d, i),
-  })), [data, labelInterval]);
+    label: labels[i],
+  })), [data, labels]);
 
   const tempYAxisProps = useMemo(() => getYAxisProps([highData, lowData, avgData], 200), [highData, lowData, avgData]);
   const windYAxisProps = useMemo(() => getYAxisProps([windData], 200), [windData]);

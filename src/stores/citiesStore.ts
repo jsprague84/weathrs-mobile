@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useShallow } from 'zustand/react/shallow';
 
 export interface SavedCity {
   id: string;
@@ -166,7 +167,7 @@ export const useSelectedCityId = () => citiesStore((s) => s.selectedCityId);
 export const useSelectedCity = () => citiesStore((s) => s.getSelectedCity());
 
 // Action selectors (stable references)
-export const useCitiesActions = () => citiesStore((s) => ({
+export const useCitiesActions = () => citiesStore(useShallow((s) => ({
   addCity: s.addCity,
   removeCity: s.removeCity,
   selectCity: s.selectCity,
@@ -174,4 +175,4 @@ export const useCitiesActions = () => citiesStore((s) => ({
   reorderCities: s.reorderCities,
   getCityById: s.getCityById,
   migrateCity: s.migrateCity,
-}));
+})));

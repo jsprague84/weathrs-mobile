@@ -36,10 +36,6 @@ function getTemperatureUnit(units: Units): string {
   }
 }
 
-function getSpeedUnit(units: Units): string {
-  return units === 'imperial' ? 'mph' : 'm/s';
-}
-
 /**
  * Compute y-axis scaling props that handle both positive and negative values.
  * gifted-charts requires: maxValue = noOfSections * stepValue

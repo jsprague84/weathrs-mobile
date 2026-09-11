@@ -10,10 +10,9 @@ import { useRouter } from 'expo-router';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
-import api from '@/services/api';
+import { api } from '@/services/api';
 import { DailyForecastCard, HourlyForecastCard, WeatherCharts, CitySelector, Loading, ErrorDisplay, ErrorBoundary, StaleDataBanner, CurrentDateTime } from '@/components';
 import { useCityToQuery, useHaptics } from '@/hooks';
-import type { DailyForecast, HourlyForecast } from '@/types';
 
 type ForecastView = 'daily' | 'hourly' | 'charts';
 

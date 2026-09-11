@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useShallow } from 'zustand/react/shallow';
 
 interface NotificationsState {
   // Push token
@@ -78,9 +79,9 @@ export const useIsNotificationsRegistered = () => notificationsStore((s) => s.is
 export const useNotificationsEnabled = () => notificationsStore((s) => s.enabled);
 
 // Action selectors (stable references)
-export const useNotificationsActions = () => notificationsStore((s) => ({
+export const useNotificationsActions = () => notificationsStore(useShallow((s) => ({
   setExpoPushToken: s.setExpoPushToken,
   setRegistered: s.setRegistered,
   setEnabled: s.setEnabled,
   clearRegistration: s.clearRegistration,
-}));
+})));

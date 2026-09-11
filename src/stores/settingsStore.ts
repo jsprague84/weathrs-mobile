@@ -5,8 +5,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useShallow } from 'zustand/react/shallow';
 import type { Units } from '@/types';
-import api from '@/services/api';
+import { api } from '@/services/api';
 
 export type ThemeMode = 'system' | 'light' | 'dark' | 'midnight';
 
@@ -92,10 +93,10 @@ export const useThemeMode = () => settingsStore((s) => s.themeMode);
 export const useIsHydrated = () => settingsStore((s) => s.isHydrated);
 
 // Action selectors (stable references)
-export const useSettingsActions = () => settingsStore((s) => ({
+export const useSettingsActions = () => settingsStore(useShallow((s) => ({
   setApiUrl: s.setApiUrl,
   setDefaultCity: s.setDefaultCity,
   setUnits: s.setUnits,
   setThemeMode: s.setThemeMode,
   initialize: s.initialize,
-}));
+})));

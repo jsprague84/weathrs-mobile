@@ -22,9 +22,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/theme';
-import api from '@/services/api';
+import { api } from '@/services/api';
 import { Card, Button, Loading, NotificationSettings } from '@/components';
 import { useCityToQuery, useHaptics } from '@/hooks';
 import type { SchedulerJob, CreateJobRequest, UpdateJobRequest, Units } from '@/types';
@@ -508,9 +507,8 @@ interface SchedulerModalProps {
 }
 
 export function SchedulerModal({ visible, onClose }: SchedulerModalProps) {
-  const { units } = useSettingsStore();
   const { cityToQuery, cityDisplayName } = useCityToQuery({ withDisplay: true });
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { selection, notification } = useHaptics();
   const queryClient = useQueryClient();
 

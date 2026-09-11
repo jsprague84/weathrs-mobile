@@ -4,11 +4,9 @@
 
 import type {
   CurrentWeather,
-  Forecast,
   FullForecast,
   DailyForecast,
   HourlyForecast,
-  SchedulerJob,
   SchedulerStatus,
   TriggerResponse,
   Units,

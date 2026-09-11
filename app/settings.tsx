@@ -12,10 +12,10 @@ import { useCitiesStore } from '@/stores/citiesStore';
 import { useTheme } from '@/theme';
 import { useLocation } from '@/hooks/useLocation';
 import { resolveLocation, resolveCoordinates } from '@/services/location';
-import { Button, Card, Loading, SchedulerModal } from '@/components';
+import { Button, Card, SchedulerModal } from '@/components';
 import { useHaptics } from '@/hooks/useHaptics';
 import { useStats } from '@/hooks/useWeather';
-import api from '@/services/api';
+import { api } from '@/services/api';
 import type { Units } from '@/types';
 
 export default function SettingsScreen() {
@@ -23,7 +23,7 @@ export default function SettingsScreen() {
   const { cities, addCity, removeCity, selectCity, selectedCityId } = useCitiesStore();
   const { colors, isDark } = useTheme();
   const { selection, notification } = useHaptics();
-  const { requestLocation, loading: locationLoading, hasPermission } = useLocation();
+  const { requestLocation, loading: locationLoading } = useLocation();
 
   const queryClient = useQueryClient();
   const stats = useStats();
@@ -93,7 +93,7 @@ export default function SettingsScreen() {
       if (!defaultCity) {
         setDefaultCity(location.name);
       }
-    } catch (error) {
+    } catch {
       await notification(NotificationFeedbackType.Error);
       Alert.alert('Error', 'Could not find that location. Try a city name or ZIP code.');
     }
@@ -124,7 +124,7 @@ export default function SettingsScreen() {
       setDefaultCity(location.name);
       await notification(NotificationFeedbackType.Success);
       Alert.alert('Location Added', `Added "${location.name}" as "My Location".`);
-    } catch (error) {
+    } catch {
       await notification(NotificationFeedbackType.Error);
       Alert.alert('Error', 'Could not resolve your location.');
     }
@@ -367,7 +367,6 @@ export default function SettingsScreen() {
             const icon = mode === 'light' ? 'sunny-outline' as const
               : mode === 'dark' ? 'moon-outline' as const
               : 'sparkles-outline' as const;
-            const isSelected = themeMode === mode || (themeMode === 'system' && mode === 'light') || (themeMode === 'system' && mode === 'dark');
             const isActive = themeMode === mode;
             return (
               <Pressable
@@ -549,7 +548,7 @@ export default function SettingsScreen() {
                                   try {
                                     await api.deleteHistory(cityStat.locationKey);
                                     queryClient.invalidateQueries({ queryKey: ['stats'] });
-                                  } catch (e) {
+                                  } catch {
                                     Alert.alert('Error', 'Failed to delete history');
                                   }
                                 },
@@ -572,7 +571,7 @@ export default function SettingsScreen() {
                       const result = await api.cleanupHistory();
                       Alert.alert('Cleanup Complete', `Updated ${result.updated} records`);
                       queryClient.invalidateQueries({ queryKey: ['stats'] });
-                    } catch (e) {
+                    } catch {
                       Alert.alert('Error', 'Cleanup failed');
                     }
                   }}

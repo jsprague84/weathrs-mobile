@@ -298,14 +298,14 @@ export interface StatsResponse {
   };
   history: {
     totalRecords: number;
-    cities: Array<{
+    cities: {
       city: string;
       locationKey: string;
       recordCount: number;
       earliestTimestamp: number;
       latestTimestamp: number;
       missingDays: number;
-    }>;
+    }[];
   };
   tileUsage: {
     owmTiles: { usedToday: number; dailyLimit: number };

@@ -12,7 +12,7 @@ import { useNotifications, scheduleLocalNotification } from '@/hooks/useNotifica
 import { useNotificationsStore } from '@/stores/notificationsStore';
 import { useCitiesStore } from '@/stores/citiesStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import api from '@/services/api';
+import { api } from '@/services/api';
 import { Card, Button } from '@/components';
 import { useHaptics } from '@/hooks/useHaptics';
 
