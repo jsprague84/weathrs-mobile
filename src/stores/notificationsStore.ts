@@ -16,15 +16,11 @@ interface NotificationsState {
 
   // Notification preferences
   enabled: boolean;
-  dailyForecastEnabled: boolean;
-  alertsEnabled: boolean;
 
   // Actions
   setExpoPushToken: (token: string | null) => void;
   setRegistered: (registered: boolean) => void;
   setEnabled: (enabled: boolean) => void;
-  setDailyForecastEnabled: (enabled: boolean) => void;
-  setAlertsEnabled: (enabled: boolean) => void;
   clearRegistration: () => void;
 }
 
@@ -35,8 +31,6 @@ const notificationsStore = create<NotificationsState>()(
       isRegistered: false,
       registeredAt: null,
       enabled: true,
-      dailyForecastEnabled: true,
-      alertsEnabled: true,
 
       setExpoPushToken: (token: string | null) => {
         set({
@@ -52,14 +46,6 @@ const notificationsStore = create<NotificationsState>()(
 
       setEnabled: (enabled: boolean) => {
         set({ enabled });
-      },
-
-      setDailyForecastEnabled: (enabled: boolean) => {
-        set({ dailyForecastEnabled: enabled });
-      },
-
-      setAlertsEnabled: (enabled: boolean) => {
-        set({ alertsEnabled: enabled });
       },
 
       clearRegistration: () => {
@@ -78,8 +64,6 @@ const notificationsStore = create<NotificationsState>()(
         isRegistered: state.isRegistered,
         registeredAt: state.registeredAt,
         enabled: state.enabled,
-        dailyForecastEnabled: state.dailyForecastEnabled,
-        alertsEnabled: state.alertsEnabled,
       }),
     }
   )
@@ -92,15 +76,11 @@ export const useNotificationsStore = notificationsStore;
 export const useExpoPushToken = () => notificationsStore((s) => s.expoPushToken);
 export const useIsNotificationsRegistered = () => notificationsStore((s) => s.isRegistered);
 export const useNotificationsEnabled = () => notificationsStore((s) => s.enabled);
-export const useDailyForecastEnabled = () => notificationsStore((s) => s.dailyForecastEnabled);
-export const useAlertsEnabled = () => notificationsStore((s) => s.alertsEnabled);
 
 // Action selectors (stable references)
 export const useNotificationsActions = () => notificationsStore((s) => ({
   setExpoPushToken: s.setExpoPushToken,
   setRegistered: s.setRegistered,
   setEnabled: s.setEnabled,
-  setDailyForecastEnabled: s.setDailyForecastEnabled,
-  setAlertsEnabled: s.setAlertsEnabled,
   clearRegistration: s.clearRegistration,
 }));

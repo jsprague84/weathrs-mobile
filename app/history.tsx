@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useTransition, type ComponentProps } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Platform } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -69,6 +70,60 @@ function getTrendColor(trend: string, colors: { chartRed: string; chartBlue: str
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00');
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+interface DayCardProps {
+  day: DailyHistorySummary;
+  colors: ReturnType<typeof useTheme>['colors'];
+  isDark: boolean;
+  units: string;
+}
+
+function DayCard({ day, colors, isDark, units }: DayCardProps) {
+  return (
+    <View style={[styles.dayCard, {
+      backgroundColor: colors.card,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: colors.border,
+    }]}>
+      <View style={styles.dayHeader}>
+        <Text style={[styles.dayDate, { color: colors.text }]}>
+          {formatDate(day.date)}
+        </Text>
+        {day.dominant_condition && (
+          <Text style={[styles.dayCondition, { color: colors.textSecondary }]}>
+            {day.dominant_condition}
+          </Text>
+        )}
+      </View>
+      <View style={styles.dayStats}>
+        <View style={styles.dayStat}>
+          <Ionicons name="thermometer" size={14} color={colors.chartRed} />
+          <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
+            {Math.round(day.temp_max)}/{Math.round(day.temp_min)}{getTemperatureUnit(units)}
+          </Text>
+        </View>
+        <View style={styles.dayStat}>
+          <Ionicons name="water" size={14} color={colors.chartGreen} />
+          <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
+            {Math.round(day.humidity_avg)}%
+          </Text>
+        </View>
+        <View style={styles.dayStat}>
+          <Ionicons name="rainy" size={14} color={colors.chartBlue} />
+          <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
+            {Math.round(day.precipitation_total * 10) / 10}mm
+          </Text>
+        </View>
+        <View style={styles.dayStat}>
+          <Ionicons name="speedometer" size={14} color={colors.chartPurple} />
+          <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
+            {Math.round(day.wind_speed_avg)} {units === 'imperial' ? 'mph' : 'm/s'}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
 }
 
 export default function HistoryScreen() {
@@ -181,9 +236,15 @@ export default function HistoryScreen() {
 
   const summary = trendsQuery.data?.summary;
   const days: DailyHistorySummary[] = dailyQuery.data?.days ?? [];
+  const breakdownDays = showAllDays ? days : days.slice(0, 30);
 
   return (
-    <ScrollView
+    <FlashList
+      data={breakdownDays}
+      keyExtractor={(item) => item.date}
+      renderItem={({ item }) => (
+        <DayCard day={item} colors={colors} isDark={isDark} units={units} />
+      )}
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
       refreshControl={
@@ -193,7 +254,8 @@ export default function HistoryScreen() {
           tintColor={colors.primary}
         />
       }
-    >
+      ListHeaderComponent={
+        <>
       {/* City Selector */}
       {cities.length > 0 && (
         <CitySelector onAddCity={handleAddCity} />
@@ -431,52 +493,12 @@ export default function HistoryScreen() {
 
       {/* Daily Breakdown */}
       {days.length > 0 && (
+        <Text style={[styles.breakdownTitle, { color: colors.text }]} accessibilityRole="header">Daily Breakdown</Text>
+      )}
+        </>
+      }
+      ListFooterComponent={
         <View style={styles.breakdownSection}>
-          <Text style={[styles.breakdownTitle, { color: colors.text }]} accessibilityRole="header">Daily Breakdown</Text>
-          {(showAllDays ? days : days.slice(0, 30)).map((day) => (
-            <View key={day.date} style={[styles.dayCard, {
-              backgroundColor: colors.card,
-              borderWidth: isDark ? 1 : 0,
-              borderColor: colors.border,
-            }]}>
-              <View style={styles.dayHeader}>
-                <Text style={[styles.dayDate, { color: colors.text }]}>
-                  {formatDate(day.date)}
-                </Text>
-                {day.dominant_condition && (
-                  <Text style={[styles.dayCondition, { color: colors.textSecondary }]}>
-                    {day.dominant_condition}
-                  </Text>
-                )}
-              </View>
-              <View style={styles.dayStats}>
-                <View style={styles.dayStat}>
-                  <Ionicons name="thermometer" size={14} color={colors.chartRed} />
-                  <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
-                    {Math.round(day.temp_max)}/{Math.round(day.temp_min)}{getTemperatureUnit(units)}
-                  </Text>
-                </View>
-                <View style={styles.dayStat}>
-                  <Ionicons name="water" size={14} color={colors.chartGreen} />
-                  <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
-                    {Math.round(day.humidity_avg)}%
-                  </Text>
-                </View>
-                <View style={styles.dayStat}>
-                  <Ionicons name="rainy" size={14} color={colors.chartBlue} />
-                  <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
-                    {Math.round(day.precipitation_total * 10) / 10}mm
-                  </Text>
-                </View>
-                <View style={styles.dayStat}>
-                  <Ionicons name="speedometer" size={14} color={colors.chartPurple} />
-                  <Text style={[styles.dayStatText, { color: colors.textSecondary }]}>
-                    {Math.round(day.wind_speed_avg)} {units === 'imperial' ? 'mph' : 'm/s'}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          ))}
           {!showAllDays && days.length > 30 && (
             <Pressable
               style={[styles.showMoreButton, { borderColor: colors.border }]}
@@ -487,13 +509,12 @@ export default function HistoryScreen() {
               </Text>
             </Pressable>
           )}
+          <Text style={[styles.hint, { color: colors.textMuted }]}>
+            Pull down to refresh
+          </Text>
         </View>
-      )}
-
-      <Text style={[styles.hint, { color: colors.textMuted }]}>
-        Pull down to refresh
-      </Text>
-    </ScrollView>
+      }
+    />
   );
 }
 

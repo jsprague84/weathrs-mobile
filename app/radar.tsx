@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useCityToQuery } from '@/hooks/useCityToQuery';
+import { useRadar } from '@/hooks/useRadar';
 import { useLocation } from '@/hooks/useLocation';
 import { resolveCoordinates } from '@/services/location';
 import { RadarMap } from '@/components/RadarMap';
@@ -17,7 +18,6 @@ export default function RadarScreen() {
   const { requestLocation } = useLocation();
 
   const [activeLayer, setActiveLayer] = useState<RadarLayer>('precipitation_new');
-  const [isPlaying, setIsPlaying] = useState(false);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number } | null>(null);
 
   // Use map center override or fall back to selected city, then US center
@@ -44,7 +44,7 @@ export default function RadarScreen() {
     }
   }, [requestLocation]);
 
-  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const { timestamp: currentTimestamp } = useRadar();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -77,11 +77,7 @@ export default function RadarScreen() {
 
       {/* Playback bar */}
       <View style={{ backgroundColor: colors.background }}>
-        <RadarPlayback
-          currentTimestamp={currentTimestamp}
-          isPlaying={isPlaying}
-          onTogglePlay={() => setIsPlaying((p) => !p)}
-        />
+        <RadarPlayback currentTimestamp={currentTimestamp} />
       </View>
     </View>
   );

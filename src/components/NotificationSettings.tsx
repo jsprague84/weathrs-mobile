@@ -2,8 +2,8 @@
  * Notification settings component for managing push notifications
  */
 
-import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Switch, Pressable, Platform, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, Switch, Pressable, Platform } from 'react-native';
 import * as Device from 'expo-device';
 import { NotificationFeedbackType } from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,25 +17,19 @@ import { Card, Button } from '@/components';
 import { useHaptics } from '@/hooks/useHaptics';
 
 export function NotificationSettings() {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { selection, notification } = useHaptics();
   const {
     registerForPushNotifications,
     loading: permissionLoading,
-    hasPermission,
     isPushSupported,
-    isExpoGo,
   } = useNotifications();
   const {
     expoPushToken,
     isRegistered,
     enabled,
-    dailyForecastEnabled,
-    alertsEnabled,
     setExpoPushToken,
     setEnabled,
-    setDailyForecastEnabled,
-    setAlertsEnabled,
     clearRegistration,
   } = useNotificationsStore();
   const { cities } = useCitiesStore();
@@ -121,16 +115,6 @@ export function NotificationSettings() {
       }
     }
   };
-
-  const handleToggleDailyForecast = useCallback(async (value: boolean) => {
-    await selection();
-    setDailyForecastEnabled(value);
-  }, [selection, setDailyForecastEnabled]);
-
-  const handleToggleAlerts = useCallback(async (value: boolean) => {
-    await selection();
-    setAlertsEnabled(value);
-  }, [selection, setAlertsEnabled]);
 
   const handleSendTestNotification = async () => {
     await selection();
