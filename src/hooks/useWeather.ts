@@ -11,17 +11,17 @@ import type { Units, HistoryPeriod } from '@/types';
 // Query keys
 export const weatherKeys = {
   all: ['weather'] as const,
-  current: (city?: string) => [...weatherKeys.all, 'current', city] as const,
-  forecast: (city?: string) => [...weatherKeys.all, 'forecast', city] as const,
-  daily: (city?: string) => [...weatherKeys.all, 'daily', city] as const,
-  hourly: (city?: string) => [...weatherKeys.all, 'hourly', city] as const,
-  widget: (city?: string) => [...weatherKeys.all, 'widget', city] as const,
+  current: (city?: string, units?: Units) => [...weatherKeys.all, 'current', city, units] as const,
+  forecast: (city?: string, units?: Units) => [...weatherKeys.all, 'forecast', city, units] as const,
+  daily: (city?: string, units?: Units) => [...weatherKeys.all, 'daily', city, units] as const,
+  hourly: (city?: string, units?: Units) => [...weatherKeys.all, 'hourly', city, units] as const,
+  widget: (city?: string, units?: Units) => [...weatherKeys.all, 'widget', city, units] as const,
   airQuality: (city?: string) => [...weatherKeys.all, 'airQuality', city] as const,
-  history: (city?: string) => [...weatherKeys.all, 'history', city] as const,
-  dailyHistory: (city?: string, period?: string, customStart?: number, customEnd?: number) =>
-    [...weatherKeys.all, 'dailyHistory', city, period, customStart, customEnd] as const,
-  trends: (city?: string, period?: string, customStart?: number, customEnd?: number) =>
-    [...weatherKeys.all, 'trends', city, period, customStart, customEnd] as const,
+  history: (city?: string, period?: string, units?: Units) => [...weatherKeys.all, 'history', city, period, units] as const,
+  dailyHistory: (city?: string, period?: string, customStart?: number, customEnd?: number, units?: Units) =>
+    [...weatherKeys.all, 'dailyHistory', city, period, customStart, customEnd, units] as const,
+  trends: (city?: string, period?: string, customStart?: number, customEnd?: number, units?: Units) =>
+    [...weatherKeys.all, 'trends', city, period, customStart, customEnd, units] as const,
   scheduler: ['scheduler'] as const,
   schedulerStatus: () => [...weatherKeys.scheduler, 'status'] as const,
   schedulerJobs: () => [...weatherKeys.scheduler, 'jobs'] as const,
@@ -33,7 +33,7 @@ export function useCurrentWeather(city?: string) {
   const queryCity = city || defaultCity;
 
   return useQuery({
-    queryKey: weatherKeys.current(queryCity),
+    queryKey: weatherKeys.current(queryCity, units),
     queryFn: () => api.getCurrentWeather(queryCity || undefined, units),
     enabled: !!queryCity,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -47,7 +47,7 @@ export function useForecast(city?: string) {
   const queryCity = city || defaultCity;
 
   return useQuery({
-    queryKey: weatherKeys.forecast(queryCity),
+    queryKey: weatherKeys.forecast(queryCity, units),
     queryFn: () => api.getFullForecast(queryCity || undefined, units),
     enabled: !!queryCity,
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -61,7 +61,7 @@ export function useDailyForecast(city?: string) {
   const queryCity = city || defaultCity;
 
   return useQuery({
-    queryKey: weatherKeys.daily(queryCity),
+    queryKey: weatherKeys.daily(queryCity, units),
     queryFn: () => api.getDailyForecast(queryCity || undefined, units),
     enabled: !!queryCity,
     staleTime: 30 * 60 * 1000, // 30 minutes
@@ -75,7 +75,7 @@ export function useHourlyForecast(city?: string) {
   const queryCity = city || defaultCity;
 
   return useQuery({
-    queryKey: weatherKeys.hourly(queryCity),
+    queryKey: weatherKeys.hourly(queryCity, units),
     queryFn: () => api.getHourlyForecast(queryCity || undefined, units),
     enabled: !!queryCity,
     staleTime: 15 * 60 * 1000, // 15 minutes
@@ -100,7 +100,7 @@ export function useWeatherHistory(city?: string, period: HistoryPeriod = '7d') {
   const { start, end } = getHistoryRange(period);
 
   return useQuery({
-    queryKey: weatherKeys.history(queryCity),
+    queryKey: weatherKeys.history(queryCity, period, units),
     queryFn: () => api.getWeatherHistory(queryCity!, start, end, units),
     enabled: !!queryCity,
     staleTime: 60 * 60 * 1000, // 1 hour
@@ -122,7 +122,7 @@ export function useDailyHistory(
   const range = isCustom ? { start: customStart, end: customEnd } : getHistoryRange(period as Exclude<HistoryPeriod, 'custom'>);
 
   return useQuery({
-    queryKey: weatherKeys.dailyHistory(queryCity, period, isCustom ? customStart : undefined, isCustom ? customEnd : undefined),
+    queryKey: weatherKeys.dailyHistory(queryCity, period, isCustom ? customStart : undefined, isCustom ? customEnd : undefined, units),
     queryFn: () => api.getDailyHistory(queryCity!, range.start, range.end, units),
     enabled: !!queryCity && (!isCustom || (customStart != null && customEnd != null)),
     staleTime: 60 * 60 * 1000, // 1 hour
@@ -143,7 +143,7 @@ export function useWeatherTrends(
   const isCustom = period === 'custom' && customStart != null && customEnd != null;
 
   return useQuery({
-    queryKey: weatherKeys.trends(queryCity, period, isCustom ? customStart : undefined, isCustom ? customEnd : undefined),
+    queryKey: weatherKeys.trends(queryCity, period, isCustom ? customStart : undefined, isCustom ? customEnd : undefined, units),
     queryFn: () => api.getWeatherTrends(queryCity!, period, units, isCustom ? customStart : undefined, isCustom ? customEnd : undefined),
     enabled: !!queryCity && (!isCustom || (customStart != null && customEnd != null)),
     staleTime: 30 * 60 * 1000, // 30 minutes
@@ -188,7 +188,7 @@ export function useWidget(city?: string) {
   const queryCity = city || defaultCity;
 
   return useQuery({
-    queryKey: weatherKeys.widget(queryCity),
+    queryKey: weatherKeys.widget(queryCity, units),
     queryFn: () => api.getWidget(queryCity!, units),
     enabled: !!queryCity,
     staleTime: 5 * 60 * 1000, // 5 minutes (matches Cache-Control: max-age=300)
