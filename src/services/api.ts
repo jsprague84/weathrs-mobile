@@ -49,7 +49,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-class WeathrsApi {
+export class WeathrsApi {
   private baseUrl: string;
   private apiKey: string | null = null;
 
@@ -118,7 +118,7 @@ class WeathrsApi {
         return response.json();
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
-          lastError = new Error(`Request timed out after ${timeoutMs / 1000}s`);
+          throw new Error(`Request timed out after ${timeoutMs / 1000}s`);
         } else if (error instanceof TypeError && attempt < MAX_RETRIES) {
           // Network errors (TypeError from fetch) are retryable
           lastError = error as Error;
