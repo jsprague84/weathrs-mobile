@@ -2,7 +2,7 @@
   "expo": {
     "name": "Weathrs",
     "slug": "weathrs-mobile",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -32,7 +32,7 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
-      "versionCode": 12,
+      "versionCode": 13,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyALp-QVCPPK73LieSVl7Pw6zwb3-nZUTB0"
